@@ -56,7 +56,7 @@ namespace Aesir5
                     if (tile < TileManager.Epf[0].max)
                     {
                         //Bitmap bitmap = ImageRenderer.Singleton.GetTileBitmap(tile);
-                        g.DrawImage(ImageRenderer.Singleton.GetTileBitmap(tile), x * sizeModifier, y * sizeModifier);//, 36, 36);
+                        g.DrawImage(new ImageRenderer().GetTileBitmap(tile), x * sizeModifier, y * sizeModifier);//, 36, 36);
                         //bitmap = null;
                     }
                 }
@@ -223,7 +223,7 @@ namespace Aesir5
 
         public void Reload(bool render)
         {
-            sizeModifier = ImageRenderer.Singleton.sizeModifier;
+            sizeModifier = ImageRenderer.SizeModifier;
             SetClientSizeCore((10 * sizeModifier) - 1, (10 * sizeModifier) + 39);
             MinimumSize = new Size(ClientSize.Width + 6, ClientSize.Height + 24);
             MaximumSize = new Size(ClientSize.Width + 6, ClientSize.Height + 24);

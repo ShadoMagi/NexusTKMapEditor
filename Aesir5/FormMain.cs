@@ -48,11 +48,6 @@ namespace Aesir5
             }
         }
 
-        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            ImageRenderer.Singleton.Dispose();
-        }
-
         private void newMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
             new FormMap(this).Show();
@@ -91,9 +86,9 @@ namespace Aesir5
             {
                 x36ToolStripMenuItem.Checked = false;
                 x24ToolStripMenuItem.Checked = false;
-                ImageRenderer.Singleton.ClearTileCache();
-                ImageRenderer.Singleton.ClearObjectCache();
-                ImageRenderer.Singleton.sizeModifier = 48;
+                ImageRenderer.ClearTileCache();
+                ImageRenderer.ClearObjectCache();
+                ImageRenderer.SizeModifier = 48;
                 fTile.Reload(true);
                 fObject.Reload(true);
 
@@ -125,9 +120,9 @@ namespace Aesir5
             {
                 x48ToolStripMenuItem.Checked = false;
                 x24ToolStripMenuItem.Checked = false;
-                ImageRenderer.Singleton.ClearTileCache();
-                ImageRenderer.Singleton.ClearObjectCache();
-                ImageRenderer.Singleton.sizeModifier = 36;
+                ImageRenderer.ClearTileCache();
+                ImageRenderer.ClearObjectCache();
+                ImageRenderer.SizeModifier = 36;
                 fTile.Reload(true);
                 fObject.Reload(true);
 
@@ -159,9 +154,9 @@ namespace Aesir5
             {
                 x48ToolStripMenuItem.Checked = false;
                 x36ToolStripMenuItem.Checked = false;
-                ImageRenderer.Singleton.ClearTileCache();
-                ImageRenderer.Singleton.ClearObjectCache();
-                ImageRenderer.Singleton.sizeModifier = 24;
+                ImageRenderer.ClearTileCache();
+                ImageRenderer.ClearObjectCache();
+                ImageRenderer.SizeModifier = 24;
                 fTile.Reload(true);
                 fObject.Reload(true);
 

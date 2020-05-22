@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
@@ -21,12 +22,35 @@ namespace Aesir5
             public int TileNumber { get; set; }
             public bool Passability { get; set; }
             public int ObjectNumber { get; set; }
+            
+            public Bitmap RenderedTile { get; set; }
+
+            private async Task<Bitmap> RenderTile()
+            {
+                if (TileNumber >= TileManager.Epf[0].max) return null;
+
+                try
+                {
+                    return await Task.FromResult(new ImageRenderer().GetTileBitmap(TileNumber));
+                }
+                catch (IndexOutOfRangeException e)
+                {
+                    Console.Out.WriteLine(e.ToString());
+                    return null;
+                }
+            }
+
+            private async void AsyncInit()
+            {
+                RenderedTile = await RenderTile();
+            }
 
             public Tile(int tileNumber, bool passability, int objectNumber)
             {
                 TileNumber = tileNumber;
                 Passability = passability;
                 ObjectNumber = objectNumber;
+                AsyncInit();
             }
 
             public static Tile GetDefault()
@@ -86,8 +110,8 @@ namespace Aesir5
                 }
             }
             
-            short sx = reader.ReadInt16();
-            short sy = reader.ReadInt16();
+            ushort sx = reader.ReadUInt16();
+            ushort sy = reader.ReadUInt16();
 
             CreateEmptyMap(sx, sy);
 
@@ -101,9 +125,9 @@ namespace Aesir5
             {
                 for (int x = 0; x < sx; x++)
                 {
-                    short tileNumber = reader.ReadInt16();
-                    short passable = reader.ReadInt16();
-                    short objectNumber = reader.ReadInt16();
+                    ushort tileNumber = reader.ReadUInt16();
+                    ushort passable = reader.ReadUInt16();
+                    ushort objectNumber = reader.ReadUInt16();
                     MapData.Add(new Point(x, y), new Tile(tileNumber, Convert.ToBoolean(passable), objectNumber));
                 }
             }
@@ -208,6 +232,7 @@ namespace Aesir5
             Size = new Size(width, height);
             MapData = new Dictionary<Point, Tile>();
         }
+        
 
         #region Compression/Encryption
 

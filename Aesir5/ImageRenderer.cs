@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,27 +10,12 @@ namespace Aesir5
 {
     public class ImageRenderer : IDisposable
     {
-        static readonly int CacheInitialCapacity = 40000;
-
         bool isDisposed;
-        public int sizeModifier = 36;
-        Dictionary<int, Bitmap> cachedTiles = new Dictionary<int, Bitmap>(CacheInitialCapacity);
-        Dictionary<int, Bitmap> cachedObjects = new Dictionary<int, Bitmap>(CacheInitialCapacity);
+        public static int SizeModifier = 36;
+        private static readonly ConcurrentDictionary<int, Bitmap> CachedTiles = new ConcurrentDictionary<int, Bitmap>();
+        private static readonly ConcurrentDictionary<int, Bitmap> CachedObjects = new ConcurrentDictionary<int, Bitmap>();
         Bitmap bitmap;
         Bitmap resizeBitmap;
-
-        #region Singleton Member Variables
-        // Disallow instance creation.
-        private ImageRenderer()
-        { }
-
-        static readonly ImageRenderer singleton = new ImageRenderer();
-
-        public static ImageRenderer Singleton
-        {
-            get { return singleton; }
-        }
-        #endregion
 
         #region IDisposable Methods
         public void Dispose()
@@ -59,8 +45,8 @@ namespace Aesir5
 
         public Bitmap GetTileBitmap(int tile)
         {
-            if (cachedTiles.ContainsKey(tile))
-                return cachedTiles[tile];
+            if (CachedTiles.ContainsKey(tile))
+                return CachedTiles[tile];
 
             bitmap = new Bitmap(48, 48, PixelFormat.Format8bppIndexed);
             ColorPalette palette = bitmap.Palette;
@@ -112,17 +98,17 @@ namespace Aesir5
 
             Marshal.Copy(pixelData, 0, bitmapdata.Scan0, pixelData.Length);
             bitmap.UnlockBits(bitmapdata);
-            resizeBitmap = new Bitmap(bitmap, sizeModifier, sizeModifier);
+            resizeBitmap = new Bitmap(bitmap, SizeModifier, SizeModifier);
             //bitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
 
-            cachedTiles[tile] = resizeBitmap;
+            CachedTiles[tile] = resizeBitmap;
             return resizeBitmap;
         }
 
         public Bitmap GetObjectBitmap(int tile)
         {
-            if (cachedObjects.ContainsKey(tile))
-                return cachedObjects[tile];
+            if (CachedObjects.ContainsKey(tile))
+                return CachedObjects[tile];
 
             bitmap = new Bitmap(48, 48, PixelFormat.Format8bppIndexed);
             ColorPalette palette = bitmap.Palette;
@@ -175,27 +161,27 @@ namespace Aesir5
 
             Marshal.Copy(pixelData, 0, bitmapdata.Scan0, pixelData.Length);
             bitmap.UnlockBits(bitmapdata);
-            resizeBitmap = new Bitmap(bitmap, sizeModifier, sizeModifier);
+            resizeBitmap = new Bitmap(bitmap, SizeModifier, SizeModifier);
             //bitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
 
-            cachedObjects[tile] = resizeBitmap;
+            CachedObjects[tile] = resizeBitmap;
             return resizeBitmap;
         }
 
-        public void ClearTileCache()
+        public static void ClearTileCache()
         {
-            foreach (Bitmap bitmap in cachedTiles.Values)
+            foreach (Bitmap bitmap in CachedTiles.Values)
                 bitmap.Dispose();
 
-            cachedTiles.Clear();
+            CachedTiles.Clear();
         }
 
-        public void ClearObjectCache()
+        public static void ClearObjectCache()
         {
-            foreach (Bitmap bitmap in cachedObjects.Values)
+            foreach (Bitmap bitmap in CachedObjects.Values)
                 bitmap.Dispose();
 
-            cachedObjects.Clear();
+            CachedObjects.Clear();
         }
     }
 }

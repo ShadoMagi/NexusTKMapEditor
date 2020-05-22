@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.pnlImage = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pnlImage)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pnlImage)).BeginInit();
             this.SuspendLayout();
             // 
             // pnlImage
@@ -64,16 +64,12 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Minimap";
             this.TopMost = true;
-            ((System.ComponentModel.ISupportInitialize)(this.pnlImage)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pnlImage)).EndInit();
             this.ResumeLayout(false);
-
         }
-
-        #endregion
 
         internal System.Windows.Forms.PictureBox pnlImage;
 
-
-
+        #endregion
     }
 }

@@ -53,7 +53,11 @@ namespace Aesir5
         public bool ShowPass
         {
             get { return showPass; }
-            set { showPass = value; pnlImage.Invalidate(); }
+            set { showPass = value;
+                pnlImage.Invalidate();
+                
+                Reload(true);
+            }
         }
 
         public FormMap(Form mdiParent)
@@ -119,22 +123,6 @@ namespace Aesir5
                     }
                 }
                 penGrid.Dispose();
-            }
-
-            if (ShowPass)
-            {
-                Pen penRed = new Pen(Color.Red, 2);
-                Pen penGreen = new Pen(Color.Green, 2);
-                for (int i = 0; i < activeMap.Size.Width; i++)
-                {
-                    for (int j = 0; j < activeMap.Size.Height; j++)
-                    {
-                        Map.Tile mapTile = activeMap[i, j];
-                        e.Graphics.DrawRectangle((mapTile == null || mapTile.Passability) ? penRed : penGreen, i * sizeModifier + (sizeModifier * 5 / 12), j * sizeModifier + (sizeModifier * 5 / 12), (sizeModifier * 1 / 6), (sizeModifier * 1 / 6));
-                    }
-                }
-                penGreen.Dispose();
-                penRed.Dispose();
             }
 
             if (focusedTile.X >= 0 && focusedTile.Y >= 0 &&
@@ -817,7 +805,7 @@ namespace Aesir5
 
         public void Reload(bool render)
         {
-            sizeModifier = ImageRenderer.Singleton.sizeModifier;
+            sizeModifier = ImageRenderer.SizeModifier;
             SetImage(null);
             resizeWindowToDefaultToolStripMenuItem.PerformClick();
             if (render) RenderMap();
@@ -983,25 +971,27 @@ namespace Aesir5
                     tileGraphics.Dispose();
                 }
             }
+            
+            if (ShowPass)
+            {
+                Pen penRed = new Pen(Color.Red, 2);
+                Pen penGreen = new Pen(Color.Green, 2); 
+                Map.Tile mapTile = activeMap[x, y];
+                g.DrawRectangle((mapTile == null || mapTile.Passability) ? penRed : penGreen, x * sizeModifier + (sizeModifier * 5 / 12), y * sizeModifier + (sizeModifier * 5 / 12), (sizeModifier * 1 / 6), (sizeModifier * 1 / 6));
+                penGreen.Dispose();
+                penRed.Dispose();
+            }
             //if (tileBitmap != null) tileBitmap.Dispose();
             //if (objectBitmap != null) objectBitmap.Dispose();
         }
 
         private Bitmap GetTileBitmap(int x, int y)
         {
-            if (!showTiles) return null;
-
-            bitmap = new Bitmap(sizeModifier, sizeModifier);
-
             Map.Tile mapTile = activeMap[x, y];
             if (mapTile == null || mapTile.TileNumber <= 0) return null;
-            if (mapTile.TileNumber >= TileManager.Epf[0].max) return null;
 
-            Graphics graphics = Graphics.FromImage(bitmap);
-            Bitmap tmpBitmap = ImageRenderer.Singleton.GetTileBitmap(mapTile.TileNumber);
-            graphics.DrawImage(tmpBitmap, 0, 0);
-            graphics.Dispose();
-            return bitmap;
+            GraphicsUnit pageUnit = GraphicsUnit.World;
+            return mapTile.RenderedTile.Clone(mapTile.RenderedTile.GetBounds(ref pageUnit), mapTile.RenderedTile.PixelFormat);
         }
 
         private Bitmap GetObjectBitmap(int x, int y)
@@ -1026,11 +1016,11 @@ namespace Aesir5
                 if (objectHeight <= i) continue;
 
                 int tile = TileManager.ObjectInfos[objectNumber].Indices[objectHeight - i - 1];
-                if (bitmap == null) bitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
+                if (bitmap == null) bitmap = new ImageRenderer().GetObjectBitmap(tile);
                 else
                 {
                     //Graphics graphics = Graphics.FromImage(bitmap);
-                    Bitmap tmpBitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
+                    Bitmap tmpBitmap = new ImageRenderer().GetObjectBitmap(tile);
                     graphics.DrawImage(tmpBitmap, 0, 0);
                     //tmpBitmap.Dispose();
                     //graphics.Dispose();

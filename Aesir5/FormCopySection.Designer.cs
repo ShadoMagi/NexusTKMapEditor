@@ -40,10 +40,10 @@
             this.checkBoxCopyPass = new System.Windows.Forms.CheckBox();
             this.buttonOK = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownUpperX)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownUpperY)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLowerX)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLowerY)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownUpperX)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownUpperY)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownLowerX)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownLowerY)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -62,7 +62,6 @@
             this.numericUpDownUpperX.Name = "numericUpDownUpperX";
             this.numericUpDownUpperX.Size = new System.Drawing.Size(72, 20);
             this.numericUpDownUpperX.TabIndex = 1;
-            
             // 
             // numericUpDownUpperY
             // 
@@ -138,7 +137,7 @@
             // 
             // buttonOK
             // 
-            this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonOK.Location = new System.Drawing.Point(93, 171);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 23);
@@ -149,7 +148,7 @@
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.Location = new System.Drawing.Point(174, 171);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
@@ -176,30 +175,29 @@
             this.Name = "FormCopySection";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Copy Section";
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownUpperX)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownUpperY)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLowerX)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLowerY)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownUpperX)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownUpperY)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownLowerX)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownLowerY)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
-        #endregion
-
-        private System.Windows.Forms.Label labelUpperLeft;
-        private System.Windows.Forms.NumericUpDown numericUpDownUpperX;
-        private System.Windows.Forms.NumericUpDown numericUpDownUpperY;
-        private System.Windows.Forms.NumericUpDown numericUpDownLowerX;
-        private System.Windows.Forms.NumericUpDown numericUpDownLowerY;
-        private System.Windows.Forms.Label labelLowerRight;
+        private System.Windows.Forms.Button buttonCancel;
+        private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.CheckBox checkBoxCopyObjects;
+        private System.Windows.Forms.CheckBox checkBoxCopyPass;
         private System.Windows.Forms.CheckBox checkBoxCopyTiles;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button buttonOK;
-        private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.CheckBox checkBoxCopyPass;
+        private System.Windows.Forms.Label labelLowerRight;
+        private System.Windows.Forms.Label labelUpperLeft;
+        private System.Windows.Forms.NumericUpDown numericUpDownLowerX;
+        private System.Windows.Forms.NumericUpDown numericUpDownLowerY;
+        private System.Windows.Forms.NumericUpDown numericUpDownUpperX;
+        private System.Windows.Forms.NumericUpDown numericUpDownUpperY;
+
+        #endregion
     }
 }
