@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormTile));
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.sb1 = new System.Windows.Forms.HScrollBar();
@@ -109,28 +110,28 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ClientSize = new System.Drawing.Size(250, 288);
-            this.ControlBox = false;
             this.Controls.Add(this.sb1);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(256, 317);
-            this.MinimizeBox = false;
             this.Name = "FormTile";
             this.ShowInTaskbar = false;
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Tiles";
-            this.TransparencyKey = System.Drawing.Color.White;
+            this.TopMost = true;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormTile_FormClosing);
             this.Load += new System.EventHandler(this.frmTile_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.frmTile_Paint);
+            this.ResizeEnd += new System.EventHandler(this.FormTile_ResizeEnd);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.formTile_Paint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.frmTile_MouseClick);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.frmTile_MouseMove);
+            this.Move += new System.EventHandler(this.FormTile_Move);
+            this.Resize += new System.EventHandler(this.FormTile_ResizeEnd);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.menuStrip.ResumeLayout(false);

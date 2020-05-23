@@ -6,8 +6,15 @@ namespace MornaMapEditor
     public partial class FormMain : Form
     {
         public int sizeModifier;
+        private static readonly FormMain FormInstance = new FormMain();
 
-        public FormMain()
+        public static FormMain GetFormInstance()
+        {
+            return FormInstance;
+        }
+
+
+        private FormMain()
         {
             InitializeComponent();
             MdiChildActivate += FormMain_MdiChildActivate;
@@ -25,7 +32,8 @@ namespace MornaMapEditor
             TileManager.Load(Application.StartupPath);
 
             // Set forms to be MDI and show them
-            fTile = new FormTile { MdiParent = this };
+            fTile = FormTile.GetFormInstance();
+            fTile.MdiParent = this;
             fObject = new FormObject { MdiParent = this };
             fTile.Show();
             fObject.Show();
@@ -93,7 +101,7 @@ namespace MornaMapEditor
                 ImageRenderer.Singleton.ClearTileCache();
                 ImageRenderer.Singleton.ClearObjectCache();
                 ImageRenderer.Singleton.sizeModifier = 48;
-                fTile.Reload(true);
+                fTile.AdjustSizeModifier(48);
                 fObject.Reload(true);
 
                 foreach (Form mdiChild in MdiChildren)
@@ -127,7 +135,7 @@ namespace MornaMapEditor
                 ImageRenderer.Singleton.ClearTileCache();
                 ImageRenderer.Singleton.ClearObjectCache();
                 ImageRenderer.Singleton.sizeModifier = 36;
-                fTile.Reload(true);
+                fTile.AdjustSizeModifier(36);
                 fObject.Reload(true);
 
                 foreach (Form mdiChild in MdiChildren)
@@ -161,7 +169,7 @@ namespace MornaMapEditor
                 ImageRenderer.Singleton.ClearTileCache();
                 ImageRenderer.Singleton.ClearObjectCache();
                 ImageRenderer.Singleton.sizeModifier = 24;
-                fTile.Reload(true);
+                fTile.AdjustSizeModifier(24);
                 fObject.Reload(true);
 
                 foreach (Form mdiChild in MdiChildren)
@@ -189,6 +197,13 @@ namespace MornaMapEditor
                     "Shift + Left-Click: Copy Single Tile/Object\nShift + Left-Click + Drag: Copy Contiguous Tiles/Objects\nRight-Click: Fill Area\n" +
                     "Ctrl + Right-Click: Fill Map\nMouse-Wheel Up: Scroll Left\nMouse-Wheel Down: Scroll Right\nCtrl + Mouse-Wheel Up: Scroll Up\n" +
                     "Ctrl + Mouse-Wheel Down: Scroll Down", "Map Window Help");
+        }
+
+        private void showTilesMenuItem_Click(object sender, EventArgs e)
+        {
+            fTile = FormTile.GetFormInstance();
+            fTile.WindowState = FormWindowState.Normal;
+            fTile.Show();
         }
     }
 }

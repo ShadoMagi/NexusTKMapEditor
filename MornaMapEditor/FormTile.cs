@@ -7,62 +7,79 @@ namespace MornaMapEditor
 {
     public partial class FormTile : Form
     {
+
+        private static readonly int pixelBuffer = 10;
+        private Image fullTileRendering;
+        private static readonly FormTile FormInstance = new FormTile();
+
         private readonly List<Point> selectedTiles = new List<Point>();
         private Point focusedTile = new Point(-1,-1);
         private int sizeModifier;
         private bool showGrid;
+        
         public bool ShowGrid
         {
             get { return showGrid; }
-            set { showGrid = value; this.Invalidate(); }
+            set { showGrid = value; Invalidate(); }
         }
 
-        public FormTile()
+        public static FormTile GetFormInstance()
+        {
+            return FormInstance;
+        }
+
+        private FormTile()
         {
             InitializeComponent();
+            sizeModifier = ImageRenderer.Singleton.sizeModifier;
             this.MouseWheel += new MouseEventHandler(frmTile_MouseWheel);
             //this.Paint += frmTile_Paint;
         }
 
         private void frmTile_Load(object sender, EventArgs e)
         {
-            Reload(false);
-            MinimumSize = new Size(MinimumSize.Width + 10, MinimumSize.Height + 10);
-            MaximumSize = new Size(MaximumSize.Width + 10, MaximumSize.Height + 10);
-            if (this.BackgroundImage == null) this.BackgroundImage = new Bitmap(10 * sizeModifier, 10 * sizeModifier);
             menuStrip.Visible = false;
-            sb1.Maximum = (TileManager.Epf[0].max / 100) + 9;
+            MinimumSize = new Size(sizeModifier + pixelBuffer, sizeModifier + sb1.Height + menuStrip.Height + statusStrip.Height + pixelBuffer);
             RenderTileset();
-        }
-
-        private int GetTileNumber(int x, int y)
-        {
-            return sb1.Value*100 + (y*10) + x;
         }
 
         private void RenderTileset()
         {
-            //Bitmap tSet = new Bitmap(360, 360);
-            if (this.BackgroundImage == null) this.BackgroundImage = new Bitmap(10 * sizeModifier, 10 * sizeModifier);
-            Graphics g = Graphics.FromImage(this.BackgroundImage);
-            g.Clear(Color.DarkGreen);
-            for (int x = 0; x < 10; x++)
-            {
-                for (int y = 0; y < 10; y++)
-                {
-                    int tile = GetTileNumber(x, y);
+            if(fullTileRendering != null)
+                fullTileRendering.Dispose();
+            if (WindowState == FormWindowState.Minimized)
+                return;
 
-                    if (tile < TileManager.Epf[0].max)
-                    {
-                        //Bitmap bitmap = ImageRenderer.Singleton.GetTileBitmap(tile);
-                        g.DrawImage(ImageRenderer.Singleton.GetTileBitmap(tile), x * sizeModifier, y * sizeModifier);//, 36, 36);
-                        //bitmap = null;
-                    }
+            //Bitmap tSet = new Bitmap(360, 360);
+            int usableHeight = Height - sb1.Height - menuStrip.Height - statusStrip.Height - pixelBuffer;
+            int tileRows = usableHeight / sizeModifier;
+            int tilesPerRow = TileManager.Epf[0].max / tileRows;
+            int currentRow = 0;
+            int currentColumn = 0;
+
+            sb1.Maximum = tilesPerRow;
+            sb1.LargeChange = (Width / sizeModifier);
+            Bitmap tmpBitmap = new Bitmap(tilesPerRow * sizeModifier, usableHeight);
+            Graphics g = Graphics.FromImage(tmpBitmap);
+            g.Clear(Color.DarkGreen);
+
+            for (int tileNumber = 0; tileNumber < TileManager.Epf[0].max; tileNumber++)
+            {
+                int xPos =  currentColumn * sizeModifier;
+                int yPos = currentRow * sizeModifier;
+                g.DrawImage(ImageRenderer.Singleton.GetTileBitmap(tileNumber), xPos, yPos);
+
+                currentColumn++;
+                if (currentColumn > tilesPerRow)
+                {
+                    currentRow++;
+                    currentColumn = 0;
                 }
             }
 
             g.Dispose();
-            this.Invalidate();
+            fullTileRendering = tmpBitmap;
+            Invalidate();
             //this.BackgroundImage = tSet;
             //picTileset.Image = tSet;
             //Application.DoEvents();
@@ -72,42 +89,20 @@ namespace MornaMapEditor
         private void sb1_Scroll(object sender, ScrollEventArgs e)
         {
             selectedTiles.Clear();
-            RenderTileset();
+            Invalidate();
         }
 
-        void frmTile_Paint(object sender, PaintEventArgs e)
+        void formTile_Paint(object sender, PaintEventArgs e)
         {
-            //base.OnPaint(e);
+            if (BackgroundImage != null)
+                BackgroundImage.Dispose();
+            int usableHeight = Height - sb1.Height - menuStrip.Height - statusStrip.Height + pixelBuffer;
+            Bitmap tmpBitmap = new Bitmap(Width, usableHeight);
+            Graphics graphics = Graphics.FromImage(tmpBitmap);
 
-            if (ShowGrid)
-            {
-                Pen penGrid = new Pen(Color.LightCyan, 1);
-                for (int i = 0; i < 10; i++)
-                {
-                    for (int j = 0; j < 10; j++)
-                    {
-                        e.Graphics.DrawRectangle(penGrid, i*sizeModifier, j*sizeModifier, sizeModifier, sizeModifier);
-                    }
-                }
-                penGrid.Dispose();
-            }
-
-            if (selectedTiles.Count > 0)
-            {
-                Pen pen = new Pen(Color.Red, 2);
-                foreach (var selectedTile in selectedTiles)
-                {
-                    e.Graphics.DrawRectangle(pen, selectedTile.X * sizeModifier, selectedTile.Y * sizeModifier, sizeModifier, sizeModifier);
-                }
-                pen.Dispose();
-            }
-
-            if (focusedTile.X >= 0 && focusedTile.Y >= 0)
-            {
-                Pen pen = new Pen(Color.Green, 2);
-                e.Graphics.DrawRectangle(pen, focusedTile.X * sizeModifier, focusedTile.Y * sizeModifier, sizeModifier, sizeModifier);
-                pen.Dispose();
-            }
+            Rectangle sourceRectangle = new Rectangle(sb1.Value * sizeModifier,0,Width,usableHeight);
+            graphics.DrawImage(fullTileRendering, 0,0,sourceRectangle, GraphicsUnit.Pixel);
+            BackgroundImage = tmpBitmap;
         }
 
         private void frmTile_MouseWheel(object sender, MouseEventArgs e)
@@ -118,25 +113,10 @@ namespace MornaMapEditor
             }
             else if (e.Delta < 0)
             {
-                if (sb1.Value + 1 <= sb1.Maximum) sb1.Value++;
+                if (sb1.Value + 1 <= (sb1.Maximum - (Width / sizeModifier))) sb1.Value++;
             }
 
-            sb1_Scroll(null, null);
-        }
-
-        private void frmTile_MouseMove(object sender, MouseEventArgs e)
-        {
-            int newFocusedTileX = e.X / sizeModifier;
-            int newFocusedTileY = e.Y / sizeModifier;
-            bool refresh = (newFocusedTileX != focusedTile.X || newFocusedTileY != focusedTile.Y);
-
-            if (refresh)
-            {
-                focusedTile = new Point(newFocusedTileX, newFocusedTileY);
-                this.Invalidate();
-                int tileNumber = GetTileNumber(newFocusedTileX, newFocusedTileY);
-                toolStripStatusLabel.Text = string.Format("Tile number: {0}", tileNumber);
-            }
+            sb1_Scroll(null, null); 
         }
 
         private void frmTile_MouseClick(object sender, MouseEventArgs e)
@@ -162,6 +142,13 @@ namespace MornaMapEditor
             //RenderTileset();
         }
 
+        public void AdjustSizeModifier(int newModifier)
+        {
+            sizeModifier = newModifier;
+            RenderTileset();
+            Invalidate();
+        }
+        
         public Dictionary<Point, int> GetSelection()
         {
             Dictionary<Point, int> dictionary = new Dictionary<Point, int>();
@@ -177,8 +164,8 @@ namespace MornaMapEditor
 
             foreach (Point selectedTile in selectedTiles)
             {
-                dictionary.Add(new Point(selectedTile.X - xMin, selectedTile.Y - yMin), 
-                    GetTileNumber(selectedTile.X, selectedTile.Y));
+                //dictionary.Add(new Point(selectedTile.X - xMin, selectedTile.Y - yMin), 
+                //    GetTileNumber(selectedTile.X, selectedTile.Y));
             }
 
             return dictionary;
@@ -195,7 +182,7 @@ namespace MornaMapEditor
             NumberInputForm numberInputForm = new NumberInputForm(@"Enter object number");
             if (numberInputForm.ShowDialog(this) == DialogResult.OK)
             {
-                NavigateToTile(numberInputForm.Number);
+               // NavigateToTile(numberInputForm.Number);
             }
         }
 
@@ -204,31 +191,25 @@ namespace MornaMapEditor
             ShowGrid = showGridToolStripMenuItem.Checked;
         }
 
-        public void NavigateToTile(int number)
+        private void FormTile_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (number < 0 || number>(sb1.Maximum*100 + 99)) return;
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                Hide();
+            }
 
-            int sbIndex = number / 100;
-            int y = (number - sbIndex * 100) / 10;
-            int x = number - sbIndex * 100 - y * 10;
+        }
 
-            sb1.Value = sbIndex;
-            selectedTiles.Clear();
-            selectedTiles.Add(new Point(x, y));
-            TileManager.TileSelection = GetSelection();
-            TileManager.LastSelection = TileManager.SelectionType.Tile;
+        private void FormTile_ResizeEnd(object sender, EventArgs e)
+        {
+            //MessageBox.Show("Got a ResizeEnd");
             RenderTileset();
         }
 
-        public void Reload(bool render)
+        private void FormTile_Move(object sender, EventArgs e)
         {
-            sizeModifier = ImageRenderer.Singleton.sizeModifier;
-            SetClientSizeCore((10 * sizeModifier) - 1, (10 * sizeModifier) + 39);
-            MinimumSize = new Size(ClientSize.Width + 6, ClientSize.Height + 24);
-            MaximumSize = new Size(ClientSize.Width + 6, ClientSize.Height + 24);
-            this.BackgroundImage = null;
-
-            if (render) RenderTileset();
+         //   pausePainting = true;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace MornaMapEditor
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMain());
+            Application.Run(FormMain.GetFormInstance());
         }
     }
 }

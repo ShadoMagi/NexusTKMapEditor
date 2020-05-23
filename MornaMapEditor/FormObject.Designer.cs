@@ -42,8 +42,7 @@
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel});
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toolStripStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 305);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(288, 22);
@@ -67,9 +66,7 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.editToolStripMenuItem,
-            this.viewToolStripMenuItem});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.editToolStripMenuItem, this.viewToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(288, 24);
@@ -77,8 +74,7 @@
             // 
             // editToolStripMenuItem
             // 
-            this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.findObjectToolStripMenuItem});
+            this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.findObjectToolStripMenuItem});
             this.editToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
@@ -87,15 +83,14 @@
             // findObjectToolStripMenuItem
             // 
             this.findObjectToolStripMenuItem.Name = "findObjectToolStripMenuItem";
-            this.findObjectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
+            this.findObjectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
             this.findObjectToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.findObjectToolStripMenuItem.Text = "&Find Object";
             this.findObjectToolStripMenuItem.Click += new System.EventHandler(this.findObjectToolStripMenuItem_Click);
             // 
             // viewToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showGridToolStripMenuItem});
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.showGridToolStripMenuItem});
             this.viewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -105,7 +100,7 @@
             // 
             this.showGridToolStripMenuItem.CheckOnClick = true;
             this.showGridToolStripMenuItem.Name = "showGridToolStripMenuItem";
-            this.showGridToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.G)));
+            this.showGridToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.G)));
             this.showGridToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             this.showGridToolStripMenuItem.Text = "Show &Grid";
             this.showGridToolStripMenuItem.Click += new System.EventHandler(this.showGridToolStripMenuItem_Click);
@@ -143,18 +138,17 @@
             this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
-        #endregion
-
-        private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.HScrollBar sb1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
-        private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem findObjectToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.MenuStrip menuStrip;
+        private System.Windows.Forms.HScrollBar sb1;
         private System.Windows.Forms.ToolStripMenuItem showGridToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+
+        #endregion
     }
 }

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapSplitJoinTool", "MapSplitJoinTool\MapSplitJoinTool.csproj", "{D4261613-FD3F-4691-A714-3750AD6DFBFF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MornaMapEditor", "MornaMapEditor\MornaMapEditor.csproj", "{8A09D314-87FD-4F10-831E-0EA425A28E5D}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MornaMapEditorInstaller", "MornaMapEditorInstaller\MornaMapEditorInstaller.vdproj", "{5B048D53-2C93-48B1-B5C8-1382234F3578}"
@@ -19,18 +17,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Debug|Any CPU.Build.0 = Debug|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Debug|x86.ActiveCfg = Debug|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Debug|x86.Build.0 = Debug|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Release|Any CPU.ActiveCfg = Release|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Release|Any CPU.Build.0 = Release|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Release|Mixed Platforms.Build.0 = Release|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Release|x86.ActiveCfg = Release|x86
-		{D4261613-FD3F-4691-A714-3750AD6DFBFF}.Release|x86.Build.0 = Release|x86
 		{8A09D314-87FD-4F10-831E-0EA425A28E5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8A09D314-87FD-4F10-831E-0EA425A28E5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A09D314-87FD-4F10-831E-0EA425A28E5D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
