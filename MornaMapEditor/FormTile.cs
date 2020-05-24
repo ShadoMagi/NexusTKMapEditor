@@ -72,8 +72,6 @@ namespace MornaMapEditor
             Graphics graphics = Graphics.FromImage(tmpBitmap);
             graphics.Clear(Color.DarkGreen);
             Pen penGrid = new Pen(Color.LightCyan, 1);
-            Pen penSelected = new Pen(Color.Red, 2);
-            Pen penFocused = new Pen(Color.Green, 2);
 
             for (int xIndex = 0; xIndex <= (int) Math.Ceiling(Convert.ToDouble(Width / sizeModifier)); xIndex++)
             {
@@ -88,24 +86,28 @@ namespace MornaMapEditor
                     
                     if (ShowGrid)
                     {
-                        e.Graphics.DrawRectangle(penGrid, tileRectangle);
-                            } 
-                    // if (selectedTiles.Count > 0)
-                    // {
-                    //
-                    //     foreach (var selectedTile in selectedTiles)
-                    //     {
-                    //         e.Graphics.DrawRectangle(penSelected, tileRectangle);
-                    //     }
-                    // }
-
-                    // if (focusedTile.X >= 0 && focusedTile.Y >= 0)
-                    // {
-                    //     e.Graphics.DrawRectangle(pen, focusedTile.X * sizeModifier, focusedTile.Y * sizeModifier, sizeModifier, sizeModifier);
-                    //     pen.Dispose();
-                    // }
+                        graphics.DrawRectangle(penGrid, tileRectangle);
+                    }
                 }
             }
+            
+            Pen penSelected = new Pen(Color.Red, 2);
+            Pen penFocused = new Pen(Color.Green, 2);
+            // Draw selected and focused after the grid so that they show up on top of grid-lines
+            // if (selectedTiles.Count > 0)
+            // {
+            //
+            //     foreach (var selectedTile in selectedTiles)
+            //     {
+            //         graphics.DrawRectangle(penSelected, tileRectangle);
+            //     }
+            // }
+
+            // if (focusedTile.X >= 0 && focusedTile.Y >= 0)
+            // {
+            //     graphics.DrawRectangle(pen, focusedTile.X * sizeModifier, focusedTile.Y * sizeModifier, sizeModifier, sizeModifier);
+            //     pen.Dispose();
+            // }
             
             BackgroundImage = tmpBitmap;
         }
