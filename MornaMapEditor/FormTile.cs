@@ -51,6 +51,7 @@ namespace MornaMapEditor
             tilesPerRow = TileManager.Epf[0].max / tileRows;
             sb1.Maximum = tilesPerRow + (Width / sizeModifier);
             sb1.LargeChange = (Width / sizeModifier);
+            selectedTiles.Clear();
             Invalidate();
         }
 
@@ -94,14 +95,15 @@ namespace MornaMapEditor
             Pen penSelected = new Pen(Color.Red, 2);
             Pen penFocused = new Pen(Color.Green, 2);
             // Draw selected and focused after the grid so that they show up on top of grid-lines
-            // if (selectedTiles.Count > 0)
-            // {
-            //
-            //     foreach (var selectedTile in selectedTiles)
-            //     {
-            //         graphics.DrawRectangle(penSelected, tileRectangle);
-            //     }
-            // }
+            if (selectedTiles.Count > 0)
+            {
+            
+                foreach (var selectedTile in selectedTiles)
+                {
+                    Rectangle tileRectangle = new Rectangle(selectedTile.X * sizeModifier, selectedTile.Y * sizeModifier, sizeModifier, sizeModifier);
+                    graphics.DrawRectangle(penSelected, tileRectangle);
+                }
+            }
 
             // if (focusedTile.X >= 0 && focusedTile.Y >= 0)
             // {
@@ -143,25 +145,26 @@ namespace MornaMapEditor
 
         private void frmTile_MouseClick(object sender, MouseEventArgs e)
         {
-            // if (e.Button != MouseButtons.Left) return;
-            //
-            // int newSelectedTileX = e.X / sizeModifier;
-            // int newSelectedTileY = e.Y / sizeModifier;
-            //
-            // Point selectedTile = new Point(newSelectedTileX, newSelectedTileY);
-            // if (ModifierKeys == Keys.Control)
-            // {
-            //     if (!selectedTiles.Contains(selectedTile))
-            //         selectedTiles.Add(selectedTile);
-            // }
-            // else
-            // {
-            //     selectedTiles.Clear();
-            //     selectedTiles.Add(selectedTile);
-            // }
-            // TileManager.TileSelection = GetSelection();
-            // TileManager.LastSelection = TileManager.SelectionType.Tile;
-            // //RenderTileset();
+            if (e.Button != MouseButtons.Left) return;
+
+            int xIndex = e.X / sizeModifier;
+            int yIndex = e.Y / sizeModifier;
+            Point selectedTile = new Point(xIndex, yIndex);
+            
+
+             if (ModifierKeys == Keys.Control)
+             {
+                 if (!selectedTiles.Contains(selectedTile))
+                     selectedTiles.Add(selectedTile);
+             }
+             else
+             {
+                 selectedTiles.Clear();
+                 selectedTiles.Add(selectedTile);
+             }
+             TileManager.TileSelection = NormalizeSelection();
+             TileManager.LastSelection = TileManager.SelectionType.Tile;
+             Invalidate();
         }
 
         public void AdjustSizeModifier(int newModifier)
@@ -171,27 +174,27 @@ namespace MornaMapEditor
             Invalidate();
         }
         
-        // public Dictionary<Point, int> GetSelection()
-        // {
-        //     Dictionary<Point, int> dictionary = new Dictionary<Point, int>();
-        //     if (selectedTiles.Count == 0) return dictionary;
-        //
-        //     int xMin = selectedTiles[0].X, yMin = selectedTiles[0].Y;
-        //
-        //     foreach (Point selectedTile in selectedTiles)
-        //     {
-        //         if (xMin > selectedTile.X) xMin = selectedTile.X;
-        //         if (yMin > selectedTile.Y) yMin = selectedTile.Y;
-        //     }
-        //
-        //     foreach (Point selectedTile in selectedTiles)
-        //     {
-        //         dictionary.Add(new Point(selectedTile.X - xMin, selectedTile.Y - yMin), 
-        //             GetTileNumber(selectedTile.X, selectedTile.Y));
-        //     }
-        //
-        //     return dictionary;
-        // }
+        public Dictionary<Point, int> NormalizeSelection()
+        {
+            Dictionary<Point, int> dictionary = new Dictionary<Point, int>();
+            if (selectedTiles.Count == 0) return dictionary;
+            
+            int xMin = selectedTiles[0].X, yMin = selectedTiles[0].Y;
+            
+            foreach (Point selectedTile in selectedTiles)
+            {
+                if (xMin > selectedTile.X) xMin = selectedTile.X;
+                if (yMin > selectedTile.Y) yMin = selectedTile.Y;
+            }
+        
+            foreach (Point selectedTile in selectedTiles)
+            {
+                int tileNumber = (sb1.Value + selectedTile.X) + (tilesPerRow * selectedTile.Y);
+                dictionary.Add(new Point(selectedTile.X - xMin, selectedTile.Y - yMin),  tileNumber);
+            }
+        
+            return dictionary;
+        }
 
         /*public void ClearSelection()
         {
@@ -224,7 +227,7 @@ namespace MornaMapEditor
         //     sb1.Value = sbIndex;
         //     selectedTiles.Clear();
         //     selectedTiles.Add(new Point(x, y));
-        //     TileManager.TileSelection = GetSelection();
+        //     TileManager.TileSelection = NormalizeSelection();
         //     TileManager.LastSelection = TileManager.SelectionType.Tile;
         //     RenderTileset();
         // }
@@ -239,15 +242,9 @@ namespace MornaMapEditor
 
         }
 
-        private void FormTile_ResizeEnd(object sender, EventArgs e)
+        private void FormTile_SizeChanged(object sender, EventArgs e)
         {
-            //MessageBox.Show("Got a ResizeEnd");
             updateTileWindow();
-        }
-
-        private void FormTile_Move(object sender, EventArgs e)
-        {
-         //   pausePainting = true;
         }
     }
 }

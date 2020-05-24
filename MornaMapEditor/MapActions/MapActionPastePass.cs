@@ -15,14 +15,14 @@ namespace MornaMapEditor.MapActions
 
         public void Undo(Map map)
         {
-            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? Map.Tile.GetDefault();
-            map[Tile.X, Tile.Y].Passability = !(newPass == 0 ? true : false);
+            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? MornaMapEditor.Tile.DefaultTile;
+            map[Tile.X, Tile.Y].Passable = newPass != 0;
         }
 
         public void Redo(Map map)
         {
-            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? Map.Tile.GetDefault();
-            map[Tile.X, Tile.Y].Passability = (newPass == 0 ? true : false);
+            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? MornaMapEditor.Tile.DefaultTile;
+            map[Tile.X, Tile.Y].Passable = (newPass == 0);
         }
     }
 }

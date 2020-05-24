@@ -128,8 +128,8 @@ namespace MornaMapEditor
                 {
                     for (int j = 0; j < activeMap.Size.Height; j++)
                     {
-                        Map.Tile mapTile = activeMap[i, j];
-                        e.Graphics.DrawRectangle((mapTile == null || mapTile.Passability) ? penRed : penGreen, i * sizeModifier + (sizeModifier * 5 / 12), j * sizeModifier + (sizeModifier * 5 / 12), (sizeModifier * 1 / 6), (sizeModifier * 1 / 6));
+                        Tile mapTile = activeMap[i, j];
+                        e.Graphics.DrawRectangle((mapTile == null || mapTile.Passable) ? penRed : penGreen, i * sizeModifier + (sizeModifier * 5 / 12), j * sizeModifier + (sizeModifier * 5 / 12), (sizeModifier * 1 / 6), (sizeModifier * 1 / 6));
                     }
                 }
                 penGreen.Dispose();
@@ -241,11 +241,11 @@ namespace MornaMapEditor
                 focusedTile = new Point(newFocusedTileX, newFocusedTileY);
                 pnlImage.Refresh();
 
-                Map.Tile mapTile = activeMap[newFocusedTileX, newFocusedTileY];
+                Tile mapTile = activeMap[newFocusedTileX, newFocusedTileY];
 
                 string message = string.Format("Focused tile: ({0}, {1})", newFocusedTileX, newFocusedTileY);
                 if (mapTile == null) message += "    Pass = False";
-                else message += string.Format("Tile number: {0}    Object number: {1}    Pass: {2}", mapTile.TileNumber, mapTile.ObjectNumber, !mapTile.Passability);
+                else message += string.Format("Tile number: {0}    Object number: {1}    Pass: {2}", mapTile.TileNumber, mapTile.ObjectNumber, !mapTile.Passable);
 
                 toolStripStatusLabel.Text = message;
             }
@@ -264,7 +264,7 @@ namespace MornaMapEditor
                     {
                         for (int y = 0; y < activeMap.Size.Height; y++)
                         {
-                            activeMap[x, y] = activeMap[x, y] ?? Map.Tile.GetDefault();
+                            activeMap[x, y] = activeMap[x, y] ?? Tile.DefaultTile;
                             AddMapAction(new MapActionPasteTile(new Point(x, y), activeMap[x, y].TileNumber, TileManager.TileSelection[new Point(0, 0)]));
                             activeMap[x, y].TileNumber = TileManager.TileSelection[new Point(0, 0)];
                         }
@@ -296,7 +296,7 @@ namespace MornaMapEditor
                     if (yMinFill < 0) yMinFill = 0;
                     if (yMaxFill >= activeMap.Size.Height) yMaxFill = activeMap.Size.Height;
                     
-                    activeMap[tileX, tileY] = activeMap[tileX, tileY] ?? Map.Tile.GetDefault();
+                    activeMap[tileX, tileY] = activeMap[tileX, tileY] ?? Tile.DefaultTile;
 
                     if (activeMap[tileX, tileY].TileNumber != TileManager.TileSelection[new Point(0, 0)])
                     {
@@ -668,34 +668,34 @@ namespace MornaMapEditor
             if (CopyObjects)
             {
                 TileManager.LastSelection |= TileManager.SelectionType.Object;
-                foreach (KeyValuePair<Point, Map.Tile> keyValuePair in selection)
+                foreach (KeyValuePair<Point, Tile> keyValuePair in selection)
                     TileManager.ObjectSelection.Add(keyValuePair.Key, keyValuePair.Value.ObjectNumber);
             }
 
             if (CopyTiles)
             {
                 TileManager.LastSelection |= TileManager.SelectionType.Tile;
-                foreach (KeyValuePair<Point, Map.Tile> keyValuePair in selection)
+                foreach (KeyValuePair<Point, Tile> keyValuePair in selection)
                     TileManager.TileSelection.Add(keyValuePair.Key, keyValuePair.Value.TileNumber);
             }
         }
 
-        public Dictionary<Point, Map.Tile> GetSelection(Point UpperLeft, Point LowerRight)
+        public Dictionary<Point, Tile> GetSelection(Point UpperLeft, Point LowerRight)
         {
-            Dictionary<Point, Map.Tile> dictionary = new Dictionary<Point, Map.Tile>();
+            Dictionary<Point, Tile> dictionary = new Dictionary<Point, Tile>();
 
             for (int x = UpperLeft.X; x <= LowerRight.X; x++)
             {
                 for (int y = UpperLeft.Y; y <= LowerRight.Y; y++)
                 {
-                    dictionary.Add(new Point(x - UpperLeft.X, y - UpperLeft.Y), activeMap[x, y] ?? Map.Tile.GetDefault());
+                    dictionary.Add(new Point(x - UpperLeft.X, y - UpperLeft.Y), activeMap[x, y] ?? Tile.DefaultTile);
                 }
             }
 
             return dictionary;
         }
 
-        private void replaceTile(Map.Tile oldTile, Map.Tile newTile)
+        private void replaceTile(Tile oldTile, Tile newTile)
         {
             TileManager.SelectionType pasteSelection = new TileManager.SelectionType();
 
@@ -703,7 +703,7 @@ namespace MornaMapEditor
             {
                 for (int y = 0; y <= activeMap.Size.Width; y++)
                 {
-                    if ((activeMap[x, y] ?? Map.Tile.GetDefault()) == oldTile)
+                    if ((activeMap[x, y] ?? Tile.DefaultTile) == oldTile)
                     {
                         Paste(x, y, pasteSelection);
                     }
@@ -727,12 +727,12 @@ namespace MornaMapEditor
 
                 if (mapTileX < activeMap.Size.Width && mapTileY < activeMap.Size.Height)
                 {
-                    activeMap[mapTileX, mapTileY] = activeMap[mapTileX, mapTileY] ?? Map.Tile.GetDefault();
+                    activeMap[mapTileX, mapTileY] = activeMap[mapTileX, mapTileY] ?? Tile.DefaultTile;
 
                     // Go to next step of the loop if old value equals new value
                     int oldValue;
                     if (selectionType == TileManager.SelectionType.Object) oldValue = activeMap[mapTileX, mapTileY].ObjectNumber;
-                    else if (selectionType == TileManager.SelectionType.Pass) oldValue = activeMap[mapTileX, mapTileY].Passability ? 0 : 1;
+                    else if (selectionType == TileManager.SelectionType.Pass) oldValue = activeMap[mapTileX, mapTileY].Passable ? 0 : 1;
                     else oldValue = activeMap[mapTileX, mapTileY].TileNumber;
 
                     if (oldValue == keyValuePair.Value) continue;
@@ -750,7 +750,7 @@ namespace MornaMapEditor
                     if (selectionType == TileManager.SelectionType.Pass)
                     {
                         AddMapAction(new MapActionPastePass(point, keyValuePair.Value));
-                        activeMap[mapTileX, mapTileY].Passability = (keyValuePair.Value == 0 ? true : false);
+                        activeMap[mapTileX, mapTileY].Passable = (keyValuePair.Value == 0 ? true : false);
                     }
 
                     if (selectionType == TileManager.SelectionType.Tile)
@@ -782,18 +782,18 @@ namespace MornaMapEditor
             if (lastPassToggled == passTile) return;
             lastPassToggled = passTile;
 
-            if (activeMap[tileX, tileY] == null) activeMap[tileX, tileY] = new Map.Tile(0, false, 0);
-            else activeMap[tileX, tileY].Passability = !activeMap[tileX, tileY].Passability;
+            if (activeMap[tileX, tileY] == null) activeMap[tileX, tileY] = new Tile(0, false, 0);
+            else activeMap[tileX, tileY].Passable = !activeMap[tileX, tileY].Passable;
 
             activeMap.IsModified = true;
-            AddMapAction(new MapActionPastePass(new Point(tileX, tileY), (activeMap[tileX, tileY].Passability ? 0 : 1)));
+            AddMapAction(new MapActionPastePass(new Point(tileX, tileY), (activeMap[tileX, tileY].Passable ? 0 : 1)));
             pnlImage.Invalidate();
             //RenderSingleMapTile(tileX, tileY, activeMap[tileX, tileY].TileNumber == 0);
         }
 
         public void floodFill(int fillX, int fillY, int findTile, int replaceTile)
         {
-            activeMap[fillX, fillY] = activeMap[fillX, fillY] ?? Map.Tile.GetDefault();
+            activeMap[fillX, fillY] = activeMap[fillX, fillY] ?? Tile.DefaultTile;
             if (activeMap[fillX, fillY].TileNumber != findTile) return;
 
             Paste(fillX, fillY, TileManager.SelectionType.Tile);
@@ -851,14 +851,14 @@ namespace MornaMapEditor
             }
             if (lastAction is MapActionPasteTile || lastAction is MapActionPastePass)
             {
-                Map.Tile tile = activeMap[lastAction.Tile.X, lastAction.Tile.Y];
+                Tile tile = activeMap[lastAction.Tile.X, lastAction.Tile.Y];
                 RenderSingleMapTile(lastAction.Tile.X, lastAction.Tile.Y, tile == null || tile.TileNumber == 0);
                 pnlImage.Invalidate();
                 UpdateMinimap(true, false);
             }
             else if (lastAction is MapActionPasteObject)
             {
-                Map.Tile tile = activeMap[lastAction.Tile.X, lastAction.Tile.Y];
+                Tile tile = activeMap[lastAction.Tile.X, lastAction.Tile.Y];
                 for (int i = 0; i < 12; i++)
                 {
                     if (lastAction.Tile.Y - i >= 0)
@@ -992,7 +992,7 @@ namespace MornaMapEditor
 
             bitmap = new Bitmap(sizeModifier, sizeModifier);
 
-            Map.Tile mapTile = activeMap[x, y];
+            Tile mapTile = activeMap[x, y];
             if (mapTile == null || mapTile.TileNumber <= 0) return null;
             if (mapTile.TileNumber >= TileManager.Epf[0].max) return null;
 
@@ -1015,7 +1015,7 @@ namespace MornaMapEditor
             {
                 if ((i + y) >= activeMap.Size.Height) break;
 
-                Map.Tile mapTile = activeMap[x, y + i];
+                Tile mapTile = activeMap[x, y + i];
                 if (mapTile == null || mapTile.ObjectNumber == 0) continue;
 
                 int objectNumber = mapTile.ObjectNumber;

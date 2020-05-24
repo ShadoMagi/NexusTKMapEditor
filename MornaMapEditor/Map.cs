@@ -14,51 +14,6 @@ namespace MornaMapEditor
         public bool IsEditable { get; set; }
         public Dictionary<Point, Tile> MapData { get; private set; }
 
-        public class Tile
-        {
-            public int TileNumber { get; set; }
-            public bool Passability { get; set; }
-            public int ObjectNumber { get; set; }
-
-            public Tile(int tileNumber, bool passability, int objectNumber)
-            {
-                TileNumber = tileNumber;
-                Passability = passability;
-                ObjectNumber = objectNumber;
-            }
-
-            public static Tile GetDefault()
-            {
-                return new Tile(0, true, 0);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof (Tile)) return false;
-                return Equals((Tile) obj);
-            }
-
-            public bool Equals(Tile other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return other.TileNumber == TileNumber && other.Passability.Equals(Passability) && other.ObjectNumber == ObjectNumber;
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int result = TileNumber;
-                    result = (result*397) ^ Passability.GetHashCode();
-                    result = (result*397) ^ ObjectNumber;
-                    return result;
-                }
-            }
-        }
-
         public Map(string mapPath)
         {
             Name = Path.GetFileNameWithoutExtension(mapPath);
@@ -140,7 +95,7 @@ namespace MornaMapEditor
                 for (int x = 0; x < Size.Width; x++)
                 {
                     writer.Write((short)((this[x, y] != null) ? this[x, y].TileNumber : 0));
-                    writer.Write(Convert.ToInt16((this[x, y] == null) || this[x, y].Passability));
+                    writer.Write(Convert.ToInt16((this[x, y] == null) || this[x, y].Passable));
                     writer.Write((short)((this[x,y] != null) ? this[x,y].ObjectNumber : 0));
                 }
             }

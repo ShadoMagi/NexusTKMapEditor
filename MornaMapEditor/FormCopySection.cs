@@ -61,19 +61,19 @@ namespace MornaMapEditor
             if (CopyObjects)
             {
                 TileManager.LastSelection |= TileManager.SelectionType.Object;
-                foreach (KeyValuePair<Point, Map.Tile> keyValuePair in selection)
+                foreach (KeyValuePair<Point, Tile> keyValuePair in selection)
                     TileManager.ObjectSelection.Add(keyValuePair.Key, keyValuePair.Value.ObjectNumber);
             }
             if (CopyPass)
             {
                 TileManager.LastSelection |= TileManager.SelectionType.Pass;
-                foreach (KeyValuePair<Point, Map.Tile> keyValuePair in selection)
-                    TileManager.PassSelection.Add(keyValuePair.Key, keyValuePair.Value.Passability ? 0 : 1);
+                foreach (KeyValuePair<Point, Tile> keyValuePair in selection)
+                    TileManager.PassSelection.Add(keyValuePair.Key, keyValuePair.Value.Passable ? 0 : 1);
             }
             if (CopyTiles)
             {
                 TileManager.LastSelection |= TileManager.SelectionType.Tile;
-                foreach (KeyValuePair<Point, Map.Tile> keyValuePair in selection)
+                foreach (KeyValuePair<Point, Tile> keyValuePair in selection)
                     TileManager.TileSelection.Add(keyValuePair.Key, keyValuePair.Value.TileNumber);
             }
         }
@@ -84,15 +84,15 @@ namespace MornaMapEditor
             Close();
         }
 
-        public Dictionary<Point, Map.Tile> GetSelection()
+        public Dictionary<Point, Tile> GetSelection()
         {
-            Dictionary<Point, Map.Tile> dictionary = new Dictionary<Point, Map.Tile>();
+            Dictionary<Point, Tile> dictionary = new Dictionary<Point, Tile>();
 
             for (int x = UpperLeft.X; x <= LowerRight.X; x++)
             {
                 for (int y = UpperLeft.Y; y <= LowerRight.Y; y++)
                 {
-                    dictionary.Add(new Point(x - UpperLeft.X, y - UpperLeft.Y), map[x, y] ?? Map.Tile.GetDefault());
+                    dictionary.Add(new Point(x - UpperLeft.X, y - UpperLeft.Y), map[x, y] ?? Tile.DefaultTile);
                 }
             }
 

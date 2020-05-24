@@ -16,13 +16,13 @@ namespace MornaMapEditor.MapActions
 
         public void Undo(Map map)
         {
-            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? Map.Tile.GetDefault();
+            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? MornaMapEditor.Tile.DefaultTile;
             map[Tile.X, Tile.Y].ObjectNumber = oldObjectNumber;
         }
 
         public void Redo(Map map)
         {
-            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? Map.Tile.GetDefault();
+            map[Tile.X, Tile.Y] = map[Tile.X, Tile.Y] ?? MornaMapEditor.Tile.DefaultTile;
             map[Tile.X, Tile.Y].ObjectNumber = newObjectNumber;
         }
     }
