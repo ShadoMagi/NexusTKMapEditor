@@ -54,6 +54,8 @@ namespace MornaMapEditor
                     if (x == 0 && sb1.Value == 0) continue;
 
                     int objectInfoIndex = GetObjectNumber(x);
+                    if (objectInfoIndex >= TileManager.ObjectInfos.Length)
+                        continue;
                     int objectInfoHeight = TileManager.ObjectInfos[objectInfoIndex].Height;
 
                     if ((11 - y) >= objectInfoHeight) continue;
@@ -114,8 +116,12 @@ namespace MornaMapEditor
             {
                 Pen pen = new Pen(Color.Green, 2);
                 int objectInfoIndex = GetObjectNumber(focusedColumn);
-                int objectInfoHeight = TileManager.ObjectInfos[objectInfoIndex].Height;
-                e.Graphics.DrawRectangle(pen, focusedColumn * sizeModifier, (12 * sizeModifier) - (objectInfoHeight * sizeModifier), sizeModifier, objectInfoHeight * sizeModifier);
+                if(objectInfoIndex < TileManager.ObjectInfos.Length){
+                    int objectInfoHeight = TileManager.ObjectInfos[objectInfoIndex].Height;
+                    e.Graphics.DrawRectangle(pen, focusedColumn * sizeModifier,
+                        (12 * sizeModifier) - (objectInfoHeight * sizeModifier), sizeModifier,
+                        objectInfoHeight * sizeModifier);
+                }
                 pen.Dispose();
             }
         }
