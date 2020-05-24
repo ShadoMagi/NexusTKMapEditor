@@ -12,7 +12,7 @@ namespace MornaMapEditor
         private static readonly FormTile FormInstance = new FormTile();
 
         private readonly List<Point> selectedTiles = new List<Point>();
-        private Point focusedTile = new Point(-1,-1);
+        private Point focusedTile = Point.Empty;
         private int usableHeight = 0;
         private int tilesPerRow = 0;
         private int tileRows = 0;
@@ -41,10 +41,10 @@ namespace MornaMapEditor
         {
             menuStrip.Visible = false;
             MinimumSize = new Size(sizeModifier + pixelBuffer, sizeModifier + sb1.Height + menuStrip.Height + statusStrip.Height + pixelBuffer);
-            updateTileWindow();
+            updateRenderParams();
         }
 
-        private void updateTileWindow()
+        private void updateRenderParams()
         {
             usableHeight = Height - sb1.Height - menuStrip.Height - statusStrip.Height - pixelBuffer;
             tileRows = usableHeight / sizeModifier;
@@ -58,6 +58,8 @@ namespace MornaMapEditor
         private void sb1_Scroll(object sender, ScrollEventArgs e)
         {
             selectedTiles.Clear();
+            //Trigger an 'update' to the focused tile
+            updateFocusedTile(focusedTile.X, focusedTile.Y);
             Invalidate();
         }
 
@@ -105,13 +107,18 @@ namespace MornaMapEditor
                 }
             }
 
-            // if (focusedTile.X >= 0 && focusedTile.Y >= 0)
-            // {
-            //     graphics.DrawRectangle(pen, focusedTile.X * sizeModifier, focusedTile.Y * sizeModifier, sizeModifier, sizeModifier);
-            //     pen.Dispose();
-            // }
+            if (!focusedTile.IsEmpty)
+            {
+                Rectangle tileRectangle = new Rectangle(focusedTile.X * sizeModifier, focusedTile.Y * sizeModifier, sizeModifier, sizeModifier);
+                graphics.DrawRectangle(penFocused, tileRectangle);
+            }
             
             BackgroundImage = tmpBitmap;
+            penGrid.Dispose();
+            penSelected.Dispose();
+            penFocused.Dispose();
+            statusStrip.Update();
+            sb1.Update();
         }
 
         private void frmTile_MouseWheel(object sender, MouseEventArgs e)
@@ -128,20 +135,31 @@ namespace MornaMapEditor
             sb1_Scroll(null, null); 
         }
 
-        // private void frmTile_MouseMove(object sender, MouseEventArgs e)
-        // {
-        //     int newFocusedTileX = e.X / sizeModifier;
-        //     int newFocusedTileY = e.Y / sizeModifier;
-        //     bool refresh = (newFocusedTileX != focusedTile.X || newFocusedTileY != focusedTile.Y);
-        //
-        //     if (refresh)
-        //     {
-        //         focusedTile = new Point(newFocusedTileX, newFocusedTileY);
-        //         this.Invalidate();
-        //         int tileNumber = GetTileNumber(newFocusedTileX, newFocusedTileY);
-        //         toolStripStatusLabel.Text = string.Format("Tile number: {0}", tileNumber);
-        //     }
-        // }
+        private void frmTile_MouseMove(object sender, MouseEventArgs e)
+        {
+            int xIndex = e.X / sizeModifier;
+            int yIndex = e.Y / sizeModifier;
+            updateFocusedTile(xIndex, yIndex);
+        }
+        
+        private void updateFocusedTile(int xIndex, int yIndex){
+            Point tileUnderMouse = new Point(xIndex, yIndex);
+       
+            if (!tileUnderMouse.Equals(focusedTile))
+            {
+                focusedTile = tileUnderMouse;
+                
+            }
+            
+            //Check for text chagne because scrolling will trigger a change in text without the 'tile' changing
+            int tileNumber = (sb1.Value + xIndex) + (tilesPerRow * yIndex);
+            string newText = $"Tile number: {tileNumber}";
+            if(!newText.Equals(focusTileLabel.Text)){
+                focusTileLabel.Text = newText; 
+                //Immediate repaint required here, text doesn't seem to update until you focus the status strip otherwise
+                Refresh(); 
+            }
+        }
 
         private void frmTile_MouseClick(object sender, MouseEventArgs e)
         {
@@ -170,8 +188,7 @@ namespace MornaMapEditor
         public void AdjustSizeModifier(int newModifier)
         {
             sizeModifier = newModifier;
-            updateTileWindow();
-            Invalidate();
+            updateRenderParams();
         }
         
         public Dictionary<Point, int> NormalizeSelection()
@@ -196,19 +213,13 @@ namespace MornaMapEditor
             return dictionary;
         }
 
-        /*public void ClearSelection()
-        {
-            selectedTiles.Clear();
-            this.Invalidate();
-        }*/
-
         private void findTileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-        //     NumberInputForm numberInputForm = new NumberInputForm(@"Enter object number");
-        //     if (numberInputForm.ShowDialog(this) == DialogResult.OK)
-        //     {
-        //         NavigateToTile(numberInputForm.Number);
-        //     }
+        NumberInputForm numberInputForm = new NumberInputForm(@"Enter Tile Number");
+        if (numberInputForm.ShowDialog(this) == DialogResult.OK)
+        {
+            NavigateToTile(numberInputForm.Number);
+        }
         }
 
         private void showGridToolStripMenuItem_Click(object sender, EventArgs e)
@@ -216,21 +227,31 @@ namespace MornaMapEditor
             ShowGrid = showGridToolStripMenuItem.Checked;
         }
         
-        // public void NavigateToTile(int number)
-        // {
-        //     if (number < 0 || number>(sb1.Maximum*100 + 99)) return;
-        //
-        //     int sbIndex = number / 100;
-        //     int y = (number - sbIndex * 100) / 10;
-        //     int x = number - sbIndex * 100 - y * 10;
-        //
-        //     sb1.Value = sbIndex;
-        //     selectedTiles.Clear();
-        //     selectedTiles.Add(new Point(x, y));
-        //     TileManager.TileSelection = NormalizeSelection();
-        //     TileManager.LastSelection = TileManager.SelectionType.Tile;
-        //     RenderTileset();
-        // }
+        public void NavigateToTile(int tileNumber)
+        {
+            // usableHeight = Height - sb1.Height - menuStrip.Height - statusStrip.Height - pixelBuffer;
+            // tileRows = usableHeight / sizeModifier;
+            // tilesPerRow = TileManager.Epf[0].max / tileRows;
+            // sb1.Maximum = tilesPerRow + (Width / sizeModifier);
+            
+            if (tileNumber < 0 || tileNumber> TileManager.Epf[0].max) return;
+            //int tileNumber = (sb1.Value + xIndex) + (tilesPerRow * yIndex);
+            int yIndex = tileNumber / tilesPerRow;
+            int indexInRow = tileNumber - (tilesPerRow * yIndex);
+            int viewableTilesPerRow = Width / sizeModifier;
+            
+            //Scroll to a 'window' instead of the direct indexInRow, this is a bit more of a natural interaction
+            int scrollBarIndex = (indexInRow / viewableTilesPerRow) * viewableTilesPerRow;
+            
+            int xIndex = indexInRow - scrollBarIndex;
+        
+            sb1.Value = scrollBarIndex;
+            selectedTiles.Clear();
+            selectedTiles.Add(new Point(xIndex, yIndex));
+            TileManager.TileSelection = NormalizeSelection();
+            TileManager.LastSelection = TileManager.SelectionType.Tile;
+            
+        }
 
         private void FormTile_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -244,7 +265,18 @@ namespace MornaMapEditor
 
         private void FormTile_SizeChanged(object sender, EventArgs e)
         {
-            updateTileWindow();
+            // Do not update the values when minimized, The will be incorrect
+            if (WindowState != FormWindowState.Minimized)
+            {
+                updateRenderParams();
+            }
+        }
+
+        private void FormTile_MouseLeave(object sender, EventArgs e)
+        {
+            focusedTile = Point.Empty;
+            focusTileLabel.Text = null;
+            Refresh();
         }
     }
 }
