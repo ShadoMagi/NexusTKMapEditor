@@ -966,18 +966,20 @@ namespace MornaMapEditor
             }
 
             // Only tile
-            if (showTiles && !showObjects && tileBitmap != null)
+            if (showTiles && tileBitmap != null && (!showObjects || objectBitmap == null))
                 g.DrawImage(tileBitmap, x * sizeModifier, y * sizeModifier);//, 36, 36);
 
             // Only object
-            else if (!showTiles && showObjects && objectBitmap != null)
-                g.DrawImage(objectBitmap, x * sizeModifier, y * sizeModifier);//, 36, 36);
+            else if (showObjects && objectBitmap != null && (!showTiles || tileBitmap == null))
+            {
+                //If only showing objects, make sure we have a background of dark green first
+                g.FillRectangle(Brushes.DarkGreen, x * sizeModifier, y * sizeModifier, sizeModifier, sizeModifier);
+                g.DrawImage(objectBitmap, x * sizeModifier, y * sizeModifier); //, 36, 36);
+            }
 
             // Both
             else if (showTiles && showObjects)
             {
-                if (objectBitmap == null && tileBitmap != null) g.DrawImage(tileBitmap, x * sizeModifier, y * sizeModifier);//, 36, 36);
-                if (objectBitmap != null && tileBitmap == null) g.DrawImage(objectBitmap, x * sizeModifier, y * sizeModifier);//, 36, 36);
                 if (objectBitmap != null && tileBitmap != null)
                 {
                     Graphics tileGraphics = Graphics.FromImage(tileBitmap);
@@ -993,56 +995,59 @@ namespace MornaMapEditor
 
         private Bitmap GetTileBitmap(int x, int y)
         {
-            if (!showTiles) return null;
-
-            bitmap = new Bitmap(sizeModifier, sizeModifier);
-
-            Tile mapTile = activeMap[x, y];
-            if (mapTile == null || mapTile.TileNumber <= 0) return null;
-            if (mapTile.TileNumber >= TileManager.Epf[0].max) return null;
-
-            Graphics graphics = Graphics.FromImage(bitmap);
-            Bitmap tmpBitmap = ImageRenderer.Singleton.GetTileBitmap(mapTile.TileNumber);
-            graphics.DrawImage(tmpBitmap, 0, 0);
-            graphics.Dispose();
-            return bitmap;
+            return !showTiles ? null : activeMap[x, y]?.RenderTile();
         }
 
         private Bitmap GetObjectBitmap(int x, int y)
         {
+            // if (!showObjects) return null;
+            //
+            // bitmap = new Bitmap(sizeModifier, sizeModifier);
+            // Graphics graphics = Graphics.FromImage(bitmap);
+            // if (tileBitmap == null) graphics.Clear(Color.DarkGreen);
+            //
+            // for (int i = 0; i < 12; i++)
+            // {
+            //     if ((i + y) >= activeMap.Size.Height) break;
+            //
+            //     Tile mapTile = activeMap[x, y + i];
+            //     if (mapTile == null || mapTile.ObjectNumber == 0) continue;
+            //
+            //     int objectNumber = mapTile.ObjectNumber;
+            //     if (objectNumber < 0 || objectNumber >= TileManager.ObjectInfos.Length) continue;
+            //
+            //     int objectHeight = TileManager.ObjectInfos[objectNumber].Indices.Length;
+            //     if (objectHeight <= i) continue;
+            //
+            //     int tile = TileManager.ObjectInfos[objectNumber].Indices[objectHeight - i - 1];
+            //     if (bitmap == null) bitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
+            //     else
+            //     {
+            //         //Graphics graphics = Graphics.FromImage(bitmap);
+            //         Bitmap tmpBitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
+            //         graphics.DrawImage(tmpBitmap, 0, 0);
+            //         //tmpBitmap.Dispose();
+            //         //graphics.Dispose();
+            //     }
+            // }
+            //
+            // graphics.Dispose();
+            // return bitmap;
+            
             if (!showObjects) return null;
-
+            
             bitmap = new Bitmap(sizeModifier, sizeModifier);
             Graphics graphics = Graphics.FromImage(bitmap);
             if (tileBitmap == null) graphics.Clear(Color.DarkGreen);
-
+            
+            Tile[] tilesWithPossibleObjects = new Tile[12]; 
             for (int i = 0; i < 12; i++)
             {
                 if ((i + y) >= activeMap.Size.Height) break;
-
-                Tile mapTile = activeMap[x, y + i];
-                if (mapTile == null || mapTile.ObjectNumber == 0) continue;
-
-                int objectNumber = mapTile.ObjectNumber;
-                if (objectNumber < 0 || objectNumber >= TileManager.ObjectInfos.Length) continue;
-
-                int objectHeight = TileManager.ObjectInfos[objectNumber].Indices.Length;
-                if (objectHeight <= i) continue;
-
-                int tile = TileManager.ObjectInfos[objectNumber].Indices[objectHeight - i - 1];
-                if (bitmap == null) bitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
-                else
-                {
-                    //Graphics graphics = Graphics.FromImage(bitmap);
-                    Bitmap tmpBitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
-                    graphics.DrawImage(tmpBitmap, 0, 0);
-                    //tmpBitmap.Dispose();
-                    //graphics.Dispose();
-                }
+                tilesWithPossibleObjects[i] = activeMap[x, y + i];
             }
-
-            graphics.Dispose();
-            return bitmap;
+            
+            return activeMap[x, y]?.RenderObjects(tilesWithPossibleObjects);
         }
 
         #endregion

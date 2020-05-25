@@ -1,4 +1,6 @@
-﻿namespace MornaMapEditor
+﻿using System.Drawing;
+
+namespace MornaMapEditor
 {
     public class Tile
     {
@@ -44,6 +46,39 @@
                 result = (result*397) ^ ObjectNumber;
                 return result;
             }
+        }
+
+        public Bitmap RenderTile()
+        {
+            if (TileNumber <= 0) return null;
+            if (TileNumber >= TileManager.Epf[0].max) return null;
+            return (Bitmap)ImageRenderer.Singleton.GetTileBitmap(TileNumber).Clone();
+        }
+
+        public Bitmap RenderObjects(Tile[] tilesWithPossibleObjects)
+        {
+            int sizeModifier = ImageRenderer.Singleton.sizeModifier;
+            Bitmap bitmap = new Bitmap(sizeModifier,sizeModifier);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            for(int i = 0; i < 12; i++)
+            {
+                Tile tile = tilesWithPossibleObjects[i];
+                if (tile != null && tile.ObjectNumber != 0)
+                {
+                    int objectNumber = tile.ObjectNumber;
+                    if (objectNumber >= 0 && objectNumber < TileManager.ObjectInfos.Length)
+                    {
+                        int objectHeight = TileManager.ObjectInfos[objectNumber].Indices.Length;
+                        if (objectHeight > i)
+                        {
+                            int objTileNumber = TileManager.ObjectInfos[objectNumber].Indices[objectHeight - i - 1];
+                            graphics.DrawImage(ImageRenderer.Singleton.GetObjectBitmap(objTileNumber), 0, 0);
+                        }
+                    }
+                }
+            }
+            graphics.Dispose();
+            return bitmap;
         }
     }
 }

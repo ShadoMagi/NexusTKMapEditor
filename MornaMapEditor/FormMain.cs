@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace MornaMapEditor
@@ -213,6 +214,19 @@ namespace MornaMapEditor
             fTile = FormTile.GetFormInstance();
             fTile.WindowState = FormWindowState.Normal;
             fTile.Show();
+        }
+
+        private void convertMapsToPNGsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BatchConverterDialog dialog = new BatchConverterDialog();
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                BatchConverter.ConvertMaps(dialog.SourceFolder.Text, dialog.DestinationFolder.Text);
+                ProcessStartInfo startInfo = new ProcessStartInfo("explorer.exe", dialog.DestinationFolder.Text);
+                Process.Start(startInfo);
+                MessageBox.Show("Creation of map images comlete.");
+            }
         }
     }
 }

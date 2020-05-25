@@ -88,6 +88,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArchiveInfo.cs" />
+    <Compile Include="BatchConverter.cs" />
+    <Compile Include="BatchConverterDialog.cs" />
+    <Compile Include="BatchConverterDialog.Designer.cs" />
     <Compile Include="FormAbout.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -161,6 +164,7 @@
     <Compile Include="Tile.cs" />
     <Compile Include="TileManager.cs" />
     <Compile Include="TmpHelper.cs" />
+    <EmbeddedResource Include="BatchConverterDialog.resx" />
     <EmbeddedResource Include="FormAbout.resx">
       <DependentUpon>FormAbout.cs</DependentUpon>
     </EmbeddedResource>

@@ -33,6 +33,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertMapsToPNGsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,7 +66,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.newMapToolStripMenuItem, this.toolStripMenuItem, this.exitToolStripMenuItem});
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.newMapToolStripMenuItem, this.convertMapsToPNGsToolStripMenuItem, this.toolStripMenuItem, this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
@@ -77,6 +78,13 @@
             this.newMapToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
             this.newMapToolStripMenuItem.Text = "&New Map Window";
             this.newMapToolStripMenuItem.Click += new System.EventHandler(this.newMapToolStripMenuItem_Click);
+            // 
+            // convertMapsToPNGsToolStripMenuItem
+            // 
+            this.convertMapsToPNGsToolStripMenuItem.Name = "convertMapsToPNGsToolStripMenuItem";
+            this.convertMapsToPNGsToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
+            this.convertMapsToPNGsToolStripMenuItem.Text = "Convert Maps to PNGs";
+            this.convertMapsToPNGsToolStripMenuItem.Click += new System.EventHandler(this.convertMapsToPNGsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem
             // 
@@ -216,6 +224,7 @@
         }
 
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertMapsToPNGsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
