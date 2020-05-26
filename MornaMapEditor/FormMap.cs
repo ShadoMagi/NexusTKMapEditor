@@ -1000,40 +1000,6 @@ namespace MornaMapEditor
 
         private Bitmap GetObjectBitmap(int x, int y)
         {
-            // if (!showObjects) return null;
-            //
-            // bitmap = new Bitmap(sizeModifier, sizeModifier);
-            // Graphics graphics = Graphics.FromImage(bitmap);
-            // if (tileBitmap == null) graphics.Clear(Color.DarkGreen);
-            //
-            // for (int i = 0; i < 12; i++)
-            // {
-            //     if ((i + y) >= activeMap.Size.Height) break;
-            //
-            //     Tile mapTile = activeMap[x, y + i];
-            //     if (mapTile == null || mapTile.ObjectNumber == 0) continue;
-            //
-            //     int objectNumber = mapTile.ObjectNumber;
-            //     if (objectNumber < 0 || objectNumber >= TileManager.ObjectInfos.Length) continue;
-            //
-            //     int objectHeight = TileManager.ObjectInfos[objectNumber].Indices.Length;
-            //     if (objectHeight <= i) continue;
-            //
-            //     int tile = TileManager.ObjectInfos[objectNumber].Indices[objectHeight - i - 1];
-            //     if (bitmap == null) bitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
-            //     else
-            //     {
-            //         //Graphics graphics = Graphics.FromImage(bitmap);
-            //         Bitmap tmpBitmap = ImageRenderer.Singleton.GetObjectBitmap(tile);
-            //         graphics.DrawImage(tmpBitmap, 0, 0);
-            //         //tmpBitmap.Dispose();
-            //         //graphics.Dispose();
-            //     }
-            // }
-            //
-            // graphics.Dispose();
-            // return bitmap;
-            
             if (!showObjects) return null;
             
             bitmap = new Bitmap(sizeModifier, sizeModifier);
