@@ -57,7 +57,6 @@
             this.showGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.showMinimapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.resizeWindowToDefaultToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.pnlImage = new System.Windows.Forms.PictureBox();
@@ -220,7 +219,7 @@
             // 
             // viewToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.showTilesToolStripMenuItem, this.showObjectsToolStripMenuItem, this.showPassToolStripMenuItem, this.toolStripSeparator2, this.showGridToolStripMenuItem, this.toolStripSeparator3, this.showMinimapToolStripMenuItem, this.resizeWindowToDefaultToolStripMenuItem});
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.showTilesToolStripMenuItem, this.showObjectsToolStripMenuItem, this.showPassToolStripMenuItem, this.toolStripSeparator2, this.showGridToolStripMenuItem, this.toolStripSeparator3, this.showMinimapToolStripMenuItem});
             this.viewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -231,7 +230,7 @@
             this.showTilesToolStripMenuItem.CheckOnClick = true;
             this.showTilesToolStripMenuItem.Name = "showTilesToolStripMenuItem";
             this.showTilesToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            this.showTilesToolStripMenuItem.Size = new System.Drawing.Size(328, 22);
+            this.showTilesToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.showTilesToolStripMenuItem.Text = "Show &Tiles";
             this.showTilesToolStripMenuItem.Click += new System.EventHandler(this.showTilesToolStripMenuItem_Click);
             // 
@@ -240,7 +239,7 @@
             this.showObjectsToolStripMenuItem.CheckOnClick = true;
             this.showObjectsToolStripMenuItem.Name = "showObjectsToolStripMenuItem";
             this.showObjectsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.showObjectsToolStripMenuItem.Size = new System.Drawing.Size(328, 22);
+            this.showObjectsToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.showObjectsToolStripMenuItem.Text = "Show O&bjects";
             this.showObjectsToolStripMenuItem.Click += new System.EventHandler(this.showObjectsToolStripMenuItem_Click);
             // 
@@ -249,45 +248,37 @@
             this.showPassToolStripMenuItem.CheckOnClick = true;
             this.showPassToolStripMenuItem.Name = "showPassToolStripMenuItem";
             this.showPassToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.showPassToolStripMenuItem.Size = new System.Drawing.Size(328, 22);
+            this.showPassToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.showPassToolStripMenuItem.Text = "Show P&ass";
             this.showPassToolStripMenuItem.Click += new System.EventHandler(this.showPassToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(325, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(188, 6);
             // 
             // showGridToolStripMenuItem
             // 
             this.showGridToolStripMenuItem.CheckOnClick = true;
             this.showGridToolStripMenuItem.Name = "showGridToolStripMenuItem";
             this.showGridToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.G)));
-            this.showGridToolStripMenuItem.Size = new System.Drawing.Size(328, 22);
+            this.showGridToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.showGridToolStripMenuItem.Text = "Show &Grid";
             this.showGridToolStripMenuItem.Click += new System.EventHandler(this.showGridToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(325, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(188, 6);
             // 
             // showMinimapToolStripMenuItem
             // 
             this.showMinimapToolStripMenuItem.CheckOnClick = true;
             this.showMinimapToolStripMenuItem.Name = "showMinimapToolStripMenuItem";
             this.showMinimapToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
-            this.showMinimapToolStripMenuItem.Size = new System.Drawing.Size(328, 22);
+            this.showMinimapToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.showMinimapToolStripMenuItem.Text = "Show M&inimap";
             this.showMinimapToolStripMenuItem.Click += new System.EventHandler(this.showMinimapToolStripMenuItem_Click);
-            // 
-            // resizeWindowToDefaultToolStripMenuItem
-            // 
-            this.resizeWindowToDefaultToolStripMenuItem.Name = "resizeWindowToDefaultToolStripMenuItem";
-            this.resizeWindowToDefaultToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) (((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) | System.Windows.Forms.Keys.R)));
-            this.resizeWindowToDefaultToolStripMenuItem.Size = new System.Drawing.Size(328, 22);
-            this.resizeWindowToDefaultToolStripMenuItem.Text = "Resize Window to Default (17 x 15)";
-            this.resizeWindowToDefaultToolStripMenuItem.Click += new System.EventHandler(this.resizeWindowToDefaultToolStripMenuItem_Click);
             // 
             // statusStrip
             // 
@@ -347,6 +338,7 @@
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "FormMap";
+            this.ShowIcon = false;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMap_FormClosing);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
@@ -372,7 +364,6 @@
         internal System.Windows.Forms.PictureBox pnlImage;
         private System.Windows.Forms.ToolStripMenuItem redoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resizeMapToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem resizeWindowToDefaultToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem savePngToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;

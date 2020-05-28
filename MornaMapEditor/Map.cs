@@ -12,7 +12,10 @@ namespace MornaMapEditor
         public Size Size { get; set; }
         public bool IsModified { get; set; }
         public bool IsEditable { get; set; }
-        public Dictionary<Point, Tile> MapData { get; private set; }
+        private Tile[,] mapData;
+        private Bitmap[,] mapCache;
+        private bool showTiles = true;
+        private bool showObjects = true;
 
         public Map(string mapPath)
         {
@@ -55,7 +58,7 @@ namespace MornaMapEditor
                     var tileNumber = reader.ReadUInt16();
                     var passable = reader.ReadUInt16();
                     var objectNumber = reader.ReadUInt16();
-                    MapData.Add(new Point(x, y), new Tile(tileNumber, Convert.ToBoolean(passable), objectNumber));
+                    mapData[x, y] = new Tile(tileNumber, Convert.ToBoolean(passable), objectNumber);
                 }
             }
 
@@ -106,41 +109,13 @@ namespace MornaMapEditor
             IsModified = false;
         }
 
-        private static void SaveBool(BinaryWriter writer, bool boolValue)
-        {
-            writer.Write((byte)0);
-            if (boolValue) writer.Write((byte) 1);
-            else writer.Write((byte)0);
-        }
-
-        private static void SaveInt(BinaryWriter writer, int intValue)
-        {
-            byte byte1, byte2;
-            IntTo2Bytes(intValue, out byte1, out byte2);
-            writer.Write(byte1);
-            writer.Write(byte2);
-        }
-
-        private static void IntTo2Bytes(int intValue, out byte byte1, out byte byte2)
-        {
-            byte1 = Convert.ToByte(intValue / 256);
-            byte2 = Convert.ToByte(intValue - (intValue / 256) * 256);
-        }
-
         public Tile this[int x, int y]
         {
-            get
-            {
-                Point point = new Point(x, y);
-                if (MapData.ContainsKey(point)) return MapData[point];
-                return null;
-            }
+            get => mapData[x, y];
             set
             {
                 if (!IsEditable) return;
-                Point point = new Point(x, y);
-                if (MapData.ContainsKey(point)) MapData.Remove(point);
-                MapData.Add(point, value);
+                mapData[x, y] = value;
                 IsModified = true;
             }
         }
@@ -154,7 +129,122 @@ namespace MornaMapEditor
         private void CreateEmptyMap(int width, int height)
         {
             Size = new Size(width, height);
-            MapData = new Dictionary<Point, Tile>();
+            mapData = new Tile[width,height];
+            mapCache = new Bitmap[width,height];
+        }
+
+        public Bitmap GetFullyRenderedTile(int x, int y, int sizeModifier, bool forceRenderEmpty, bool currentShowTiles, bool currentShowObjects)
+        {
+            var cachedTile = mapCache[x, y];
+            if (cachedTile?.Size.Width == sizeModifier && showTiles == currentShowTiles && showObjects == currentShowObjects)
+                return cachedTile;
+            showTiles = currentShowTiles;
+            showObjects = currentShowObjects;
+            var tileBitmap = !showTiles ? null : this[x, y]?.RenderTile();
+            var objectBitmap = GetObjectBitmap(x, y);
+            if (forceRenderEmpty)
+            {
+                Bitmap bitmapClear = new Bitmap(sizeModifier, sizeModifier);
+                Graphics gClear = Graphics.FromImage(bitmapClear);
+                gClear.Clear(Color.DarkGreen);
+
+                if (objectBitmap == null)
+                {
+                    if (tileBitmap == null) objectBitmap = bitmapClear;
+                    if (tileBitmap != null) objectBitmap = new Bitmap(sizeModifier, sizeModifier);
+                }
+                if (tileBitmap == null) tileBitmap = bitmapClear;
+                gClear.Dispose();
+                //bitmapClear.Dispose();
+            }
+
+            // Only tile
+            if (showTiles && tileBitmap != null && (!showObjects || objectBitmap == null))
+            {
+                objectBitmap?.Dispose();
+                mapCache[x, y] = (Bitmap) tileBitmap.Clone();
+            }
+
+            // Only object
+            else if (showObjects && objectBitmap != null && (!showTiles || tileBitmap == null))
+            {
+                var renderedBitmap = new Bitmap(sizeModifier, sizeModifier);
+                var graphics = Graphics.FromImage(renderedBitmap);
+                //If only showing objects, make sure we have a background of dark green first
+                graphics.FillRectangle(Brushes.DarkGreen, x * sizeModifier, y * sizeModifier, sizeModifier, sizeModifier);
+                graphics.DrawImage(objectBitmap, x * sizeModifier, y * sizeModifier); //, 36, 36)
+                graphics.Dispose();
+                tileBitmap?.Dispose();
+                objectBitmap.Dispose();
+                mapCache[x, y] = renderedBitmap;
+            }
+
+            // Both
+            else if (showTiles && showObjects)
+            {
+                if (objectBitmap != null)
+                {
+                    var renderedBitmap = (Bitmap)tileBitmap.Clone();
+                    var tileGraphics = Graphics.FromImage(renderedBitmap);
+                    
+                    tileGraphics.DrawImage(objectBitmap, 0, 0);
+                    //tileGraphics.Dispose();
+                    tileGraphics.Dispose();
+                    tileBitmap.Dispose();
+                    objectBitmap.Dispose();
+                    mapCache[x, y] = renderedBitmap;
+                }
+            }
+
+            return (Bitmap) mapCache[x, y]?.Clone();
+        }
+
+        private Bitmap GetObjectBitmap(int x, int y)
+        {
+            Tile[] tilesWithPossibleObjects = new Tile[12]; 
+            for (int i = 0; i < 12; i++)
+            {
+                if ((i + y) >= Size.Height) break;
+                tilesWithPossibleObjects[i] = this[x, y + i];
+            }
+            
+            return this[x, y]?.RenderObjects(tilesWithPossibleObjects);
+        }
+
+        public Bitmap GetRenderedMap(bool currentShowTiles, bool currentShowObjects)
+        {
+
+            showTiles = currentShowTiles;
+            showObjects = currentShowObjects;
+            
+            var sizeModifier = ImageRenderer.Singleton.sizeModifier;
+            
+            var returnImage = new Bitmap(Size.Width * sizeModifier, Size.Height * sizeModifier);
+            var graphics = Graphics.FromImage(returnImage);
+            graphics.Clear(Color.DarkGreen);
+            
+            if (showTiles || showObjects)
+            {
+                for (int x = 0; x < Size.Width; x++)
+                {
+                    for (int y = 0; y < Size.Height; y++)
+                    {
+                        var xPos = x * sizeModifier;
+                        var yPos = y * sizeModifier;
+                        var renderedTile = GetFullyRenderedTile(x, y, sizeModifier, false, showTiles, showObjects);
+                        if (renderedTile != null)
+                        {
+                            graphics.DrawImage(renderedTile, xPos, yPos);
+                            renderedTile.Dispose();
+                        }
+                        else
+                            graphics.FillRectangle(Brushes.DarkGreen, xPos, yPos, sizeModifier, sizeModifier);
+                    }
+                }
+            }
+
+            graphics.Dispose();
+            return returnImage;
         }
     }
 }

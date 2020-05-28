@@ -119,7 +119,7 @@ namespace MornaMapEditor
                     if (mdiChild is FormMap)
                     {
                         FormMap map = (FormMap)mdiChild;
-                        map.Reload(true);
+                        map.Reload();
                     }
                 }
             }
@@ -153,7 +153,7 @@ namespace MornaMapEditor
                     if (mdiChild is FormMap)
                     {
                         FormMap map = (FormMap)mdiChild;
-                        map.Reload(true);
+                        map.Reload();
                     }
                 }
             }
@@ -187,7 +187,7 @@ namespace MornaMapEditor
                     if (mdiChild is FormMap)
                     {
                         FormMap map = (FormMap)mdiChild;
-                        map.Reload(true);
+                        map.Reload();
                     }
                 }
             }

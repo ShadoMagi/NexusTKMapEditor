@@ -15,13 +15,7 @@ namespace MornaMapEditor
         public FormMinimap MinimapWindow { get; private set; }
         public bool IsMinimapVisible { get; private set; }
 
-        private Bitmap bitmap;
-        private Bitmap mapBitmap;
-        private Bitmap tileBitmap;
-        private Bitmap objectBitmap;
-        private static Thread renderThread;
         private static int untitledMapIndex;
-        private bool mapBitmapIsReady;
         private bool showTiles, showObjects;
         private bool isMouseDown;
         private bool copy;
@@ -37,6 +31,8 @@ namespace MornaMapEditor
         private int yMaxFill;
         private int saveCheck = 0;
 
+        private bool changeSinceRender;
+        
         private readonly LinkedList<IMapAction> mapUndoActions = new LinkedList<IMapAction>();
         private readonly LinkedList<IMapAction> mapRedoActions = new LinkedList<IMapAction>();
 
@@ -44,7 +40,11 @@ namespace MornaMapEditor
         public bool ShowGrid
         {
             get { return showGrid; }
-            set { showGrid = value; pnlImage.Invalidate(); }
+            set { 
+                showGrid = value;             
+                changeSinceRender = true;
+                Invalidate(); 
+            }
         }
 
         private Point lastPassToggled = new Point(-1, -1);
@@ -52,7 +52,11 @@ namespace MornaMapEditor
         public bool ShowPass
         {
             get { return showPass; }
-            set { showPass = value; pnlImage.Invalidate(); }
+            set { 
+                showPass = value; 
+                changeSinceRender = true;
+                Invalidate(); 
+            }
         }
 
         public FormMap(Form mdiParent)
@@ -66,13 +70,13 @@ namespace MornaMapEditor
             //pnlImage.Paint += pnlImage_Paint;
 
             showMinimapToolStripMenuItem.PerformClick();
-            resizeWindowToDefaultToolStripMenuItem.PerformClick();
             showTilesToolStripMenuItem.Checked = true;
             showTiles = showTilesToolStripMenuItem.Checked;
             showObjectsToolStripMenuItem.Checked = true;
             showObjects = showObjectsToolStripMenuItem.Checked;
 
-            Reload(false);
+            sizeModifier = ImageRenderer.Singleton.sizeModifier;
+            
             CreateNewMapCore(initialWidth, initialHeight);
 
             MinimapWindow.FormClosing += MinimapWindow_FormClosing;
@@ -95,18 +99,13 @@ namespace MornaMapEditor
             e.Cancel = true;
         }
 
-        private void SetImage(Image image)
-        {
-            if (pnlImage.Image != null) pnlImage.Image.Dispose();
-            pnlImage.Image = image != null ? new Bitmap(image, pnlImage.Width, pnlImage.Height) : null;
-        }
-
         #region Form event handlers
 
         private void pnlImage_Paint(object sender, PaintEventArgs e)
         {
-            //OnPaint(e);
-
+            if (!changeSinceRender)
+                return;
+            e.Graphics.DrawImage(pnlImage.Image, 0, 0);
             if (ShowGrid)
             {
                 Pen penGrid = new Pen(Color.LightCyan, 1);
@@ -153,16 +152,6 @@ namespace MornaMapEditor
                 e.Graphics.DrawRectangle(pen, focusedTile.X * sizeModifier, focusedTile.Y * sizeModifier, sizeModifier, sizeModifier);
                 pen.Dispose();
             }
-
-
-            if (pnlImage.Image == null && mapBitmapIsReady)
-            {
-                pnlImage.Image = mapBitmap;
-                pnlImage.Invalidate();
-                UpdateMinimap(true, true);
-            }
-
-
         }
 
         private void FormMap_MouseWheel(object sender, MouseEventArgs e)
@@ -269,10 +258,9 @@ namespace MornaMapEditor
                             activeMap[x, y].TileNumber = TileManager.TileSelection[new Point(0, 0)];
                         }
                     }
-
-                    SetImage(null);
-                    RenderMap();
-
+                    activeMap.IsModified = changeSinceRender = true;
+                    pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+                    Invalidate();
                 }
             }
 
@@ -302,8 +290,9 @@ namespace MornaMapEditor
                     {
                         floodFill(tileX, tileY, activeMap[tileX, tileY].TileNumber, TileManager.TileSelection[new Point(0, 0)]);
                     }
-                    //SetImage(null);
-                    //RenderMap();
+                    activeMap.IsModified = changeSinceRender = true;
+                    pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+                    Invalidate();
                 }
 
             }
@@ -393,8 +382,8 @@ namespace MornaMapEditor
                 MinimapWindow.FormClosing -= MinimapWindow_FormClosing;
                 MinimapWindow.SelectionChanged -= MinimapWindow_SelectionChanged;
                 MinimapWindow.SetImage(null);
-                SetImage(null);
                 MinimapWindow.Close();
+                pnlImage.Image?.Dispose();
                 GC.Collect();
             }
         }
@@ -480,7 +469,9 @@ namespace MornaMapEditor
 
             mapRedoActions.AddLast(lastAction); // to be able to redo what has been undone
             lastAction.Undo(activeMap);
-            RefreshMapActionUI(lastAction);
+            activeMap.IsModified = changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
         }
 
         private void redoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -491,7 +482,9 @@ namespace MornaMapEditor
 
             mapUndoActions.AddLast(lastAction); // to be able to undo what has been redone
             lastAction.Redo(activeMap);
-            RefreshMapActionUI(lastAction);
+            activeMap.IsModified = changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
         }
 
         private void editableToolStripMenuItem_Click(object sender, EventArgs e)
@@ -515,10 +508,9 @@ namespace MornaMapEditor
             AddMapAction(new MapActionResize(activeMap.Size, mapSizeDialog.MapSize));
 
             activeMap.Size = mapSizeDialog.MapSize;
-            activeMap.IsModified = true;
-            SetImage(null);
-            RenderMap();
-            //UpdateMinimap(true, true);
+            activeMap.IsModified = changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
         }
 
         private void copySectionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -536,38 +528,35 @@ namespace MornaMapEditor
         private void showTilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             showTiles = showTilesToolStripMenuItem.Checked;
-            SetImage(null);
-            RenderMap();
-            //UpdateMinimap(true, false);
+            changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
         }
 
         private void showObjectsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             showObjects = showObjectsToolStripMenuItem.Checked;
-            SetImage(null);
-            RenderMap();
-            //UpdateMinimap(true, false);
+            changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
         }
 
         private void showPassToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowPass = showPassToolStripMenuItem.Checked;
+            changeSinceRender = true;
+            Invalidate();
         }
 
         private void showGridToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowGrid = showGridToolStripMenuItem.Checked;
-        }
-
-        private void resizeWindowToDefaultToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetClientSizeCore(initialWidth * sizeModifier, initialHeight * sizeModifier + 22);
+            changeSinceRender = true;
+            Invalidate();
         }
 
         #endregion
-
-        #region Helper methods
-
+        
         private DialogResult SaveCheck()
         {
             if (!activeMap.IsModified) return DialogResult.OK;
@@ -595,11 +584,12 @@ namespace MornaMapEditor
             string mapName = "UntitledMap" + untitledMapIndex++;
             activeMap.Name = mapName;
             Text = string.Format(@"Map [{0}]", mapName);
-            SetImage(null);
             editableToolStripMenuItem.Checked = activeMap.IsEditable;
-            RenderMap();
             mapUndoActions.Clear();
             mapRedoActions.Clear();
+            changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
             //UpdateMinimap(true, true);
         }
 
@@ -624,11 +614,12 @@ namespace MornaMapEditor
             {
                 activeMap = new Map(activeMapPath);
                 Text = string.Format("Map [{0}]", activeMap.Name);
-                SetImage(null);
                 editableToolStripMenuItem.Checked = activeMap.IsEditable;
-                RenderMap();
                 mapUndoActions.Clear();
                 mapRedoActions.Clear();
+                changeSinceRender = true;
+                pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+                Invalidate();
                 //UpdateMinimap(true, true);
             }
             catch (Exception ex)
@@ -700,23 +691,6 @@ namespace MornaMapEditor
             return dictionary;
         }
 
-        private void replaceTile(Tile oldTile, Tile newTile)
-        {
-            TileManager.SelectionType pasteSelection = new TileManager.SelectionType();
-
-            for (int x = 0; x <= activeMap.Size.Width; x++)
-            {
-                for (int y = 0; y <= activeMap.Size.Width; y++)
-                {
-                    if ((activeMap[x, y] ?? Tile.DefaultTile) == oldTile)
-                    {
-                        Paste(x, y, pasteSelection);
-                    }
-                }
-            }
-
-        }
-
         private void Paste(int tileX, int tileY, TileManager.SelectionType selectionType)
         {
             Dictionary<Point, int> selection;
@@ -724,6 +698,8 @@ namespace MornaMapEditor
             else if (selectionType == TileManager.SelectionType.Pass) selection = TileManager.PassSelection;
             else if (selectionType == TileManager.SelectionType.Tile) selection = TileManager.TileSelection;
             else return;
+
+            var graphics = Graphics.FromImage(pnlImage.Image);
 
             foreach (KeyValuePair<Point, int> keyValuePair in selection)
             {
@@ -768,17 +744,28 @@ namespace MornaMapEditor
                     {
                         for (int i = 0; i < 12; i++)
                         {
-                            if (mapTileY - i >= 0) RenderSingleMapTile(mapTileX, mapTileY - i, activeMap[mapTileX, mapTileY].ObjectNumber == 0);
+                            if (mapTileY - i >= 0)
+                            {
+                                var renderedTile = activeMap.GetFullyRenderedTile(mapTileX, mapTileY - i, sizeModifier,
+                                    activeMap[mapTileX, mapTileY].ObjectNumber == 0, showTiles, showObjects);
+                                graphics.DrawImage(renderedTile, mapTileX * sizeModifier, (mapTileY - i) * sizeModifier);
+                                renderedTile.Dispose();
+                            }
                         }
-                        pnlImage.Invalidate();
                     }
                     else
-                    {
-                        RenderSingleMapTile(mapTileX, mapTileY, activeMap[mapTileX, mapTileY].TileNumber == 0);
-                        pnlImage.Invalidate();
+                    {                                
+                        var renderedTile = activeMap.GetFullyRenderedTile(mapTileX, mapTileY, sizeModifier,
+                            activeMap[mapTileX, mapTileY].TileNumber == 0, showTiles, showObjects);
+                        graphics.DrawImage(renderedTile, mapTileX * sizeModifier, mapTileY * sizeModifier);
+                        renderedTile.Dispose();
                     }
                 }
             }
+            graphics.Dispose();
+            activeMap.IsModified = changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
         }
 
         private void TogglePass(int tileX, int tileY)
@@ -792,8 +779,8 @@ namespace MornaMapEditor
 
             activeMap.IsModified = true;
             AddMapAction(new MapActionPastePass(new Point(tileX, tileY), (activeMap[tileX, tileY].Passable ? 0 : 1)));
-            pnlImage.Invalidate();
-            //RenderSingleMapTile(tileX, tileY, activeMap[tileX, tileY].TileNumber == 0);
+            activeMap.IsModified = changeSinceRender = true;
+            Refresh();
         }
 
         public void floodFill(int fillX, int fillY, int findTile, int replaceTile)
@@ -808,8 +795,6 @@ namespace MornaMapEditor
             if (fillX - 1 >= xMinFill) { floodFill(fillX - 1, fillY, findTile, replaceTile); }
             if (fillY + 1 < yMaxFill) { floodFill(fillX, fillY + 1, findTile, replaceTile); }
             if (fillY - 1 >= yMinFill) { floodFill(fillX, fillY - 1, findTile, replaceTile); }
-            return;
-
         }
 
         private void AddMapAction(IMapAction mapAction)
@@ -817,14 +802,6 @@ namespace MornaMapEditor
             if (mapUndoActions.Count > 1000) for (int i = 0; i < 100; i++) mapUndoActions.RemoveFirst();
             mapUndoActions.AddLast(mapAction);
             mapRedoActions.Clear();
-        }
-
-        public void Reload(bool render)
-        {
-            sizeModifier = ImageRenderer.Singleton.sizeModifier;
-            SetImage(null);
-            resizeWindowToDefaultToolStripMenuItem.PerformClick();
-            if (render) RenderMap();
         }
 
         private void tmrSave_Tick(object sender, EventArgs e)
@@ -840,182 +817,12 @@ namespace MornaMapEditor
             else if (saveCheck == 15) saveToolStripMenuItem.PerformClick();
         }
 
-        #endregion
-
-        #region Rendering
-
-        private void RefreshMapActionUI(IMapAction lastAction)
+        public void Reload()
         {
-            activeMap.IsModified = true;
-
-            if (lastAction is MapActionResize)
-            {
-                SetImage(null);
-                RenderMap();
-                //UpdateMinimap(true, true);
-            }
-            if (lastAction is MapActionPasteTile || lastAction is MapActionPastePass)
-            {
-                Tile tile = activeMap[lastAction.Tile.X, lastAction.Tile.Y];
-                RenderSingleMapTile(lastAction.Tile.X, lastAction.Tile.Y, tile == null || tile.TileNumber == 0);
-                pnlImage.Invalidate();
-                UpdateMinimap(true, false);
-            }
-            else if (lastAction is MapActionPasteObject)
-            {
-                Tile tile = activeMap[lastAction.Tile.X, lastAction.Tile.Y];
-                for (int i = 0; i < 12; i++)
-                {
-                    if (lastAction.Tile.Y - i >= 0)
-                        RenderSingleMapTile(lastAction.Tile.X, lastAction.Tile.Y - i,
-                                            tile == null || tile.ObjectNumber == 0);
-                }
-                pnlImage.Invalidate();
-                UpdateMinimap(true, false);
-            }
+            sizeModifier = ImageRenderer.Singleton.sizeModifier;
+            changeSinceRender = true;
+            pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
+            Invalidate();
         }
-
-        private void RenderMap()
-        {
-            //Bitmap mapBitmap;
-            if (pnlImage.Image == null)
-            {
-                int imageWidth = activeMap.Size.Width * sizeModifier;
-                int imageHeight = activeMap.Size.Height * sizeModifier;
-                mapBitmap = new Bitmap(imageWidth, imageHeight);
-            }
-            //else mapBitmap = (Bitmap) pnlImage.Image;
-
-            if (!showObjects && !showTiles)
-            {
-                mapBitmap = new Bitmap(activeMap.Size.Width * sizeModifier, activeMap.Size.Height * sizeModifier);
-                pnlImage.Image = mapBitmap;
-                return;
-            }
-
-            renderThread = new Thread(new ThreadStart(RenderLoop));
-            renderThread.Start();
-            renderThread.Join();
-            //ThreadPool.QueueUserWorkItem(o => RenderLoop());
-            //for (int x = 0; x < activeMap.Size.Width; x++)
-            //{
-            //    for (int y = 0; y < activeMap.Size.Height; y++)
-            //    {
-            //        // Debug.WriteLine("x,y:  " + x + "," + y); // testing
-            //        new Thread(o => RenderSingleMapTile(x, y, g, false)).Start();
-            //    }
-            //}
-
-            //g.Dispose();
-            //panel1.AutoScrollMinSize = pnlImage.Image.Size;
-            //pnlImage.Invalidate();
-            //picMap.Image = mapBitmap;
-            //Application.DoEvents();
-            //tSet.Dispose();
-        }
-
-        private void RenderLoop()
-        {
-            mapBitmapIsReady = false;
-            Graphics g = Graphics.FromImage(mapBitmap);
-            g.Clear(Color.DarkGreen);
-
-            for (int x = 0; x < activeMap.Size.Width; x++)
-            {
-                for (int y = 0; y < activeMap.Size.Height; y++)
-                {
-                    RenderSingleMapTile(x, y, g, false);
-                }
-            }
-
-            g.Dispose();
-            mapBitmapIsReady = true;
-            pnlImage.Invalidate();
-            MinimapWindow.pnlImage.Invalidate();
-
-        }
-
-        private void RenderSingleMapTile(int x, int y, bool forceRenderEmpty)
-        {
-            //Image mapImage = picMap.Image;
-            Graphics g = Graphics.FromImage(pnlImage.Image);
-            RenderSingleMapTile(x, y, g, forceRenderEmpty);
-            g.Dispose();
-            //picMap.Image = mapImage;
-            //picMap.Refresh();
-        }
-
-        private void RenderSingleMapTile(int x, int y, Graphics g, bool forceRenderEmpty)
-        {
-            tileBitmap = GetTileBitmap(x, y);
-            objectBitmap = GetObjectBitmap(x, y);
-            if (forceRenderEmpty)
-            {
-                Bitmap bitmapClear = new Bitmap(sizeModifier, sizeModifier);
-                Graphics gClear = Graphics.FromImage(bitmapClear);
-                gClear.Clear(Color.DarkGreen);
-
-                if (objectBitmap == null)
-                {
-                    if (tileBitmap == null) objectBitmap = bitmapClear;
-                    if (tileBitmap != null) objectBitmap = new Bitmap(sizeModifier, sizeModifier);
-                }
-                if (tileBitmap == null) tileBitmap = bitmapClear;
-                gClear.Dispose();
-                //bitmapClear.Dispose();
-            }
-
-            // Only tile
-            if (showTiles && tileBitmap != null && (!showObjects || objectBitmap == null))
-                g.DrawImage(tileBitmap, x * sizeModifier, y * sizeModifier);//, 36, 36);
-
-            // Only object
-            else if (showObjects && objectBitmap != null && (!showTiles || tileBitmap == null))
-            {
-                //If only showing objects, make sure we have a background of dark green first
-                g.FillRectangle(Brushes.DarkGreen, x * sizeModifier, y * sizeModifier, sizeModifier, sizeModifier);
-                g.DrawImage(objectBitmap, x * sizeModifier, y * sizeModifier); //, 36, 36);
-            }
-
-            // Both
-            else if (showTiles && showObjects)
-            {
-                if (objectBitmap != null && tileBitmap != null)
-                {
-                    Graphics tileGraphics = Graphics.FromImage(tileBitmap);
-                    tileGraphics.DrawImage(objectBitmap, 0, 0);
-                    //tileGraphics.Dispose();
-                    g.DrawImage(tileBitmap, x * sizeModifier, y * sizeModifier);//, 36, 36);
-                    tileGraphics.Dispose();
-                }
-            }
-            //if (tileBitmap != null) tileBitmap.Dispose();
-            //if (objectBitmap != null) objectBitmap.Dispose();
-        }
-
-        private Bitmap GetTileBitmap(int x, int y)
-        {
-            return !showTiles ? null : activeMap[x, y]?.RenderTile();
-        }
-
-        private Bitmap GetObjectBitmap(int x, int y)
-        {
-            if (!showObjects) return null;
-            
-            bitmap = new Bitmap(sizeModifier, sizeModifier);
-            Graphics graphics = Graphics.FromImage(bitmap);
-            if (tileBitmap == null) graphics.Clear(Color.DarkGreen);
-            
-            Tile[] tilesWithPossibleObjects = new Tile[12]; 
-            for (int i = 0; i < 12; i++)
-            {
-                if ((i + y) >= activeMap.Size.Height) break;
-                tilesWithPossibleObjects[i] = activeMap[x, y + i];
-            }
-            
-            return activeMap[x, y]?.RenderObjects(tilesWithPossibleObjects);
-        }
-
-        #endregion
     }
 }
