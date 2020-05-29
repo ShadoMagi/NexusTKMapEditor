@@ -9,7 +9,7 @@ namespace MornaMapEditor
         public BatchConverterDialog()
         {
             InitializeComponent();
-            string defaultMapPath =
+            var defaultMapPath =
                 $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\NexusTK\\Maps";
             sourceFolder.Text = destinationFolder.Text =
                 Directory.Exists(defaultMapPath) ? defaultMapPath : Application.UserAppDataPath;
@@ -20,7 +20,7 @@ namespace MornaMapEditor
 
         private void sourceButton_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog browseDialog = new FolderBrowserDialog();
+            var browseDialog = new FolderBrowserDialog();
             browseDialog.Description = "Select Source Folder";
             browseDialog.RootFolder = Environment.SpecialFolder.MyComputer;
             browseDialog.SelectedPath = sourceFolder.Text;
@@ -34,7 +34,7 @@ namespace MornaMapEditor
 
         private void destinationButton_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog browseDialog = new FolderBrowserDialog();
+            var browseDialog = new FolderBrowserDialog();
             browseDialog.Description = "Select Destination Folder";
             browseDialog.RootFolder = Environment.SpecialFolder.MyComputer;
             browseDialog.SelectedPath = destinationFolder.Text;
@@ -44,11 +44,6 @@ namespace MornaMapEditor
             {
                 destinationFolder.Text = browseDialog.SelectedPath;
             }
-        }
-
-        private void okButton_Click(object sender, EventArgs e)
-        {
-            
         }
     }
 }

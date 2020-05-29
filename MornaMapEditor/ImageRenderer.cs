@@ -9,14 +9,13 @@ namespace MornaMapEditor
 {
     public class ImageRenderer : IDisposable
     {
+        private object drawLock = new object();
         static readonly int CacheInitialCapacity = 40000;
 
         bool isDisposed;
         public int sizeModifier = 36;
         Dictionary<int, Bitmap> cachedTiles = new Dictionary<int, Bitmap>(CacheInitialCapacity);
         Dictionary<int, Bitmap> cachedObjects = new Dictionary<int, Bitmap>(CacheInitialCapacity);
-        Bitmap bitmap;
-        Bitmap resizeBitmap;
 
         #region Singleton Member Variables
         // Disallow instance creation.
@@ -60,9 +59,14 @@ namespace MornaMapEditor
         public Bitmap GetTileBitmap(int tile)
         {
             if (cachedTiles.ContainsKey(tile))
-                return cachedTiles[tile];
+            {
+                lock (drawLock)
+                {
+                    return cachedTiles[tile].Clone() as Bitmap;   
+                }
+            }
 
-            bitmap = new Bitmap(48, 48, PixelFormat.Format8bppIndexed);
+            var bitmap = new Bitmap(48, 48, PixelFormat.Format8bppIndexed);
             ColorPalette palette = bitmap.Palette;
             palette.Entries[0] = Color.Transparent;
 
@@ -112,11 +116,14 @@ namespace MornaMapEditor
 
             Marshal.Copy(pixelData, 0, bitmapdata.Scan0, pixelData.Length);
             bitmap.UnlockBits(bitmapdata);
-            resizeBitmap = new Bitmap(bitmap, sizeModifier, sizeModifier);
+            var resizeBitmap = new Bitmap(bitmap, sizeModifier, sizeModifier);
             //bitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
 
             cachedTiles[tile] = resizeBitmap;
-            return resizeBitmap;
+            lock (drawLock)
+            {
+                return resizeBitmap.Clone() as Bitmap;
+            }
         }
 
         public Bitmap GetObjectBitmap(int tile)
@@ -124,7 +131,7 @@ namespace MornaMapEditor
             if (cachedObjects.ContainsKey(tile))
                 return cachedObjects[tile];
 
-            bitmap = new Bitmap(48, 48, PixelFormat.Format8bppIndexed);
+            var bitmap = new Bitmap(48, 48, PixelFormat.Format8bppIndexed);
             ColorPalette palette = bitmap.Palette;
             palette.Entries[0] = Color.Transparent;
 
@@ -175,11 +182,46 @@ namespace MornaMapEditor
 
             Marshal.Copy(pixelData, 0, bitmapdata.Scan0, pixelData.Length);
             bitmap.UnlockBits(bitmapdata);
-            resizeBitmap = new Bitmap(bitmap, sizeModifier, sizeModifier);
+            var resizeBitmap = new Bitmap(bitmap, sizeModifier, sizeModifier);
             //bitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
 
             cachedObjects[tile] = resizeBitmap;
-            return resizeBitmap;
+            lock (drawLock)
+            {
+                return resizeBitmap.Clone() as Bitmap;
+            }
+        }
+        
+        public Bitmap RenderObjects(Tile[] tilesWithPossibleObjects)
+        {
+            Bitmap bitmap = new Bitmap(sizeModifier,sizeModifier);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            for(int i = 0; i < 12; i++)
+            {
+                Tile tile = tilesWithPossibleObjects[i];
+                if (tile != null && tile.ObjectNumber != 0)
+                {
+                    int objectNumber = tile.ObjectNumber;
+                    if (objectNumber >= 0 && objectNumber < TileManager.ObjectInfos.Length)
+                    {
+                        int objectHeight = TileManager.ObjectInfos[objectNumber].Indices.Length;
+                        if (objectHeight > i)
+                        {
+                            int objTileNumber = TileManager.ObjectInfos[objectNumber].Indices[objectHeight - i - 1];
+                            lock (drawLock)
+                            {
+                                graphics.DrawImage(ImageRenderer.Singleton.GetObjectBitmap(objTileNumber), 0, 0);
+                            }
+                        }
+                    }
+                }
+            } 
+            
+            graphics.Dispose(); 
+            lock (drawLock) 
+            {
+                return bitmap.Clone() as Bitmap;
+            }
         }
 
         public void ClearTileCache()
@@ -196,6 +238,41 @@ namespace MornaMapEditor
                 bitmap.Dispose();
 
             cachedObjects.Clear();
+        }
+
+        public Bitmap GetFilledObjectBitmap(Bitmap unfilledObjectBitmap, int xIndex, int yIndex)
+        {
+            var renderedBitmap = new Bitmap(sizeModifier, sizeModifier);
+            var graphics = Graphics.FromImage(renderedBitmap);
+            //If only showing objects, make sure we have a background of dark green first
+            lock (drawLock)
+            {
+                graphics.FillRectangle(Brushes.DarkGreen, xIndex * sizeModifier, yIndex * sizeModifier, sizeModifier, sizeModifier);
+                graphics.DrawImage(unfilledObjectBitmap, xIndex * sizeModifier, yIndex * sizeModifier); //, 36, 36)
+                graphics.Dispose();
+                return renderedBitmap.Clone() as Bitmap;
+            }
+        }
+
+        public Bitmap GetCombinedBitmap(Bitmap tileBitmap, Bitmap objectBitmap)
+        {
+            var renderedBitmap = (Bitmap)tileBitmap.Clone();
+            var tileGraphics = Graphics.FromImage(renderedBitmap);
+
+            lock (drawLock)
+            {
+                tileGraphics.DrawImage(objectBitmap, 0, 0);
+                tileGraphics.Dispose();
+                return renderedBitmap.Clone() as Bitmap;
+            }
+        }
+
+        public void WriteImageToFile(Bitmap image, string filename)
+        {
+            lock (drawLock)
+            {
+                image.Save(filename, ImageFormat.Png);
+            }
         }
     }
 }

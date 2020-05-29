@@ -749,7 +749,6 @@ namespace MornaMapEditor
                                 var renderedTile = activeMap.GetFullyRenderedTile(mapTileX, mapTileY - i, sizeModifier,
                                     activeMap[mapTileX, mapTileY].ObjectNumber == 0, showTiles, showObjects);
                                 graphics.DrawImage(renderedTile, mapTileX * sizeModifier, (mapTileY - i) * sizeModifier);
-                                renderedTile.Dispose();
                             }
                         }
                     }
@@ -758,7 +757,6 @@ namespace MornaMapEditor
                         var renderedTile = activeMap.GetFullyRenderedTile(mapTileX, mapTileY, sizeModifier,
                             activeMap[mapTileX, mapTileY].TileNumber == 0, showTiles, showObjects);
                         graphics.DrawImage(renderedTile, mapTileX * sizeModifier, mapTileY * sizeModifier);
-                        renderedTile.Dispose();
                     }
                 }
             }

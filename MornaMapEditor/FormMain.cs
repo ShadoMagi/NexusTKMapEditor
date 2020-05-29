@@ -218,14 +218,19 @@ namespace MornaMapEditor
 
         private void convertMapsToPNGsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            BatchConverterDialog dialog = new BatchConverterDialog();
-            DialogResult result = dialog.ShowDialog();
+            var dialog = new BatchConverterDialog();
+            var result = dialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                BatchConverter.ConvertMaps(dialog.SourceFolder.Text, dialog.DestinationFolder.Text);
-                ProcessStartInfo startInfo = new ProcessStartInfo("explorer.exe", dialog.DestinationFolder.Text);
+                var converter = new BatchConverter(dialog.SourceFolder.Text, dialog.DestinationFolder.Text);
+                var fileCount = converter.NumberToConvert();
+                var confirmation =
+                    MessageBox.Show($@"{fileCount} Files will be converted, continue?", "Convesion Confirmation", MessageBoxButtons.YesNo);
+                if (confirmation != DialogResult.Yes) return;
+                converter.ConvertMaps();
+                var startInfo = new ProcessStartInfo("explorer.exe", dialog.DestinationFolder.Text);
                 Process.Start(startInfo);
-                MessageBox.Show("Creation of map images comlete.");
+                MessageBox.Show("Creation of map images complete.");
             }
         }
     }

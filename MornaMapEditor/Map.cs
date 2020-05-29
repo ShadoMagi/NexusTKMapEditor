@@ -162,41 +162,28 @@ namespace MornaMapEditor
             if (showTiles && tileBitmap != null && (!showObjects || objectBitmap == null))
             {
                 objectBitmap?.Dispose();
-                mapCache[x, y] = (Bitmap) tileBitmap.Clone();
+                mapCache[x, y] = tileBitmap;
             }
 
             // Only object
             else if (showObjects && objectBitmap != null && (!showTiles || tileBitmap == null))
             {
-                var renderedBitmap = new Bitmap(sizeModifier, sizeModifier);
-                var graphics = Graphics.FromImage(renderedBitmap);
-                //If only showing objects, make sure we have a background of dark green first
-                graphics.FillRectangle(Brushes.DarkGreen, x * sizeModifier, y * sizeModifier, sizeModifier, sizeModifier);
-                graphics.DrawImage(objectBitmap, x * sizeModifier, y * sizeModifier); //, 36, 36)
-                graphics.Dispose();
+                var renderedBitmap = ImageRenderer.Singleton.GetFilledObjectBitmap(objectBitmap, x, y);
                 tileBitmap?.Dispose();
                 objectBitmap.Dispose();
                 mapCache[x, y] = renderedBitmap;
             }
 
             // Both
-            else if (showTiles && showObjects)
+            else if (showTiles && showObjects && tileBitmap != null && objectBitmap != null)
             {
-                if (objectBitmap != null)
-                {
-                    var renderedBitmap = (Bitmap)tileBitmap.Clone();
-                    var tileGraphics = Graphics.FromImage(renderedBitmap);
-                    
-                    tileGraphics.DrawImage(objectBitmap, 0, 0);
-                    //tileGraphics.Dispose();
-                    tileGraphics.Dispose();
-                    tileBitmap.Dispose();
-                    objectBitmap.Dispose();
-                    mapCache[x, y] = renderedBitmap;
-                }
+                var renderedBitmap = ImageRenderer.Singleton.GetCombinedBitmap(tileBitmap, objectBitmap);
+                tileBitmap.Dispose();
+                objectBitmap.Dispose();
+                mapCache[x, y] = renderedBitmap;
             }
 
-            return (Bitmap) mapCache[x, y]?.Clone();
+            return mapCache[x, y];
         }
 
         private Bitmap GetObjectBitmap(int x, int y)
@@ -208,7 +195,7 @@ namespace MornaMapEditor
                 tilesWithPossibleObjects[i] = this[x, y + i];
             }
             
-            return this[x, y]?.RenderObjects(tilesWithPossibleObjects);
+            return ImageRenderer.Singleton.RenderObjects(tilesWithPossibleObjects);
         }
 
         public Bitmap GetRenderedMap(bool currentShowTiles, bool currentShowObjects)
@@ -235,7 +222,6 @@ namespace MornaMapEditor
                         if (renderedTile != null)
                         {
                             graphics.DrawImage(renderedTile, xPos, yPos);
-                            renderedTile.Dispose();
                         }
                         else
                             graphics.FillRectangle(Brushes.DarkGreen, xPos, yPos, sizeModifier, sizeModifier);
