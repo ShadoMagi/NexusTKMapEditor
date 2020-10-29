@@ -80,7 +80,6 @@ namespace MornaMapEditor
             sizeModifier = ImageRenderer.Singleton.sizeModifier;
 
             CreateNewMapCore(initialWidth, initialHeight);
-            this.ClientSize = new System.Drawing.Size(initialWidth * 36, initialHeight * 38);
 
             MinimapWindow.FormClosing += MinimapWindow_FormClosing;
             MinimapWindow.SelectionChanged += MinimapWindow_SelectionChanged;
@@ -517,7 +516,7 @@ namespace MornaMapEditor
 
             activeMap.ResizeMap(mapSizeDialog.MapSize);
             changeSinceRender = true;
-            this.ClientSize = new System.Drawing.Size(mapSizeDialog.MapSize.Width * 36, mapSizeDialog.MapSize.Height * 38);
+            this.ClientSize = new System.Drawing.Size(mapSizeDialog.MapSize.Width * sizeModifier, mapSizeDialog.MapSize.Height * sizeModifier + System.Windows.Forms.SystemInformation.HorizontalScrollBarHeight + 5);
             pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
             Invalidate();
         }
@@ -585,7 +584,7 @@ namespace MornaMapEditor
             if (dialogResult == DialogResult.Cancel) return;
 
             CreateNewMapCore(mapSizeDialog.MapSize.Width, mapSizeDialog.MapSize.Height);
-            this.ClientSize = new System.Drawing.Size(mapSizeDialog.MapSize.Width * 36, mapSizeDialog.MapSize.Height * 38);
+            
         }
 
         private void CreateNewMapCore(int width, int height)
@@ -600,7 +599,7 @@ namespace MornaMapEditor
             changeSinceRender = true;
             pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
             Invalidate();
-            this.ClientSize = new System.Drawing.Size(width * 36, height * 38);
+            this.ClientSize = new System.Drawing.Size(width * sizeModifier, height * sizeModifier + System.Windows.Forms.SystemInformation.HorizontalScrollBarHeight + 5);
             //UpdateMinimap(true, true);
         }
 
@@ -631,7 +630,7 @@ namespace MornaMapEditor
                 changeSinceRender = true;
                 pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
                 Invalidate();
-                this.ClientSize = new System.Drawing.Size(activeMap.Size.Width * 36, activeMap.Size.Height * 38);
+                this.ClientSize = new System.Drawing.Size(activeMap.Size.Width * sizeModifier, activeMap.Size.Height * sizeModifier + System.Windows.Forms.SystemInformation.HorizontalScrollBarHeight + 5);
                 //UpdateMinimap(true, true);
             }
             catch (EndOfStreamException)
