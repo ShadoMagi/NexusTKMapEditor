@@ -32,7 +32,7 @@ namespace MornaMapEditor
         private int saveCheck = 0;
 
         private bool changeSinceRender;
-        
+
         private readonly LinkedList<IMapAction> mapUndoActions = new LinkedList<IMapAction>();
         private readonly LinkedList<IMapAction> mapRedoActions = new LinkedList<IMapAction>();
 
@@ -40,10 +40,11 @@ namespace MornaMapEditor
         public bool ShowGrid
         {
             get { return showGrid; }
-            set { 
-                showGrid = value;             
+            set
+            {
+                showGrid = value;
                 changeSinceRender = true;
-                Invalidate(); 
+                Invalidate();
             }
         }
 
@@ -52,10 +53,11 @@ namespace MornaMapEditor
         public bool ShowPass
         {
             get { return showPass; }
-            set { 
-                showPass = value; 
+            set
+            {
+                showPass = value;
                 changeSinceRender = true;
-                Invalidate(); 
+                Invalidate();
             }
         }
 
@@ -76,8 +78,9 @@ namespace MornaMapEditor
             showObjects = showObjectsToolStripMenuItem.Checked;
 
             sizeModifier = ImageRenderer.Singleton.sizeModifier;
-            
+
             CreateNewMapCore(initialWidth, initialHeight);
+            this.ClientSize = new System.Drawing.Size(initialWidth * 36, initialHeight * 38);
 
             MinimapWindow.FormClosing += MinimapWindow_FormClosing;
             MinimapWindow.SelectionChanged += MinimapWindow_SelectionChanged;
@@ -216,7 +219,7 @@ namespace MornaMapEditor
             int newFocusedTileY = e.Y / sizeModifier;
 
             bool outOfBounds = (newFocusedTileX >= activeMap.Size.Width || newFocusedTileY >= activeMap.Size.Height || newFocusedTileX < 0 || newFocusedTileY < 0);
-            if(outOfBounds)
+            if (outOfBounds)
             {
                 toolStripStatusLabel.Text = @"Outside of map";
             }
@@ -279,12 +282,12 @@ namespace MornaMapEditor
                     xMaxFill = tileX + 25;
                     yMinFill = tileY - 25;
                     yMaxFill = tileY + 25;
-                    
+
                     if (xMinFill < 0) xMinFill = 0;
                     if (xMaxFill >= activeMap.Size.Width) xMaxFill = activeMap.Size.Width;
                     if (yMinFill < 0) yMinFill = 0;
                     if (yMaxFill >= activeMap.Size.Height) yMaxFill = activeMap.Size.Height;
-                    
+
                     activeMap[tileX, tileY] = activeMap[tileX, tileY] ?? Tile.DefaultTile;
 
                     if (activeMap[tileX, tileY].TileNumber != TileManager.TileSelection[new Point(0, 0)])
@@ -328,7 +331,7 @@ namespace MornaMapEditor
             // We're in a tile that is not an actual tile, this likely happens in multi-tile painting
             if (tileX < 0 || tileX > activeMap.Size.Width || tileY < 0 || tileY > activeMap.Size.Height)
                 return;
-                    
+
             if (ShowPass)
                 TogglePass(tileX, tileY);
             else
@@ -346,14 +349,14 @@ namespace MornaMapEditor
         private void pnlImage_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left) return;
-            
+
             isMouseDown = false;
             copy = false;
 
             if (copyStartTile != new Point(-1, -1))
             {
                 toolStripStatusLabel.Text = string.Format("Upper Left: ({0}, {1}) Lower Right: ({2}, {3})", copyStartTile.X, copyStartTile.Y, focusedTile.X, focusedTile.Y);
-                
+
                 if (ModifierKeys == Keys.Alt)
                 {
                     CopySelection(copyStartTile, focusedTile, true, false);
@@ -514,6 +517,7 @@ namespace MornaMapEditor
 
             activeMap.ResizeMap(mapSizeDialog.MapSize);
             changeSinceRender = true;
+            this.ClientSize = new System.Drawing.Size(mapSizeDialog.MapSize.Width * 36, mapSizeDialog.MapSize.Height * 38);
             pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
             Invalidate();
         }
@@ -561,7 +565,7 @@ namespace MornaMapEditor
         }
 
         #endregion
-        
+
         private DialogResult SaveCheck()
         {
             if (!activeMap.IsModified) return DialogResult.OK;
@@ -581,6 +585,7 @@ namespace MornaMapEditor
             if (dialogResult == DialogResult.Cancel) return;
 
             CreateNewMapCore(mapSizeDialog.MapSize.Width, mapSizeDialog.MapSize.Height);
+            this.ClientSize = new System.Drawing.Size(mapSizeDialog.MapSize.Width * 36, mapSizeDialog.MapSize.Height * 38);
         }
 
         private void CreateNewMapCore(int width, int height)
@@ -595,6 +600,7 @@ namespace MornaMapEditor
             changeSinceRender = true;
             pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
             Invalidate();
+            this.ClientSize = new System.Drawing.Size(width * 36, height * 38);
             //UpdateMinimap(true, true);
         }
 
@@ -625,6 +631,7 @@ namespace MornaMapEditor
                 changeSinceRender = true;
                 pnlImage.Image = activeMap.GetRenderedMap(showTiles, showObjects);
                 Invalidate();
+                this.ClientSize = new System.Drawing.Size(activeMap.Size.Width * 36, activeMap.Size.Height * 38);
                 //UpdateMinimap(true, true);
             }
             catch (EndOfStreamException)
@@ -771,7 +778,7 @@ namespace MornaMapEditor
                         }
                     }
                     else
-                    {                                
+                    {
                         var renderedTile = activeMap.GetFullyRenderedTile(mapTileX, mapTileY, sizeModifier,
                             activeMap[mapTileX, mapTileY].TileNumber == 0, showTiles, showObjects);
                         graphics.DrawImage(renderedTile, mapTileX * sizeModifier, mapTileY * sizeModifier);
